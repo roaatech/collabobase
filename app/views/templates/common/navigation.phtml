@@ -1,0 +1,86 @@
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <?php if ($this->currentUser()): ?>
+                <a class="navbar-brand" href="<?= base_url('') ?>"><?= __("Welcome") ?> <strong><?= $this->currentUser()->presenter() ?></strong></a>
+            <?php else: ?>
+                <a class="navbar-brand" href="<?= base_url('') ?>"><?= __("T4F Portal") ?></a>
+            <?php endif; ?>
+        </div>
+        <div id="main-navigation" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <?php if (!$controller->session->userdata('current_user')): ?>
+                <li class="<?= @$active_tab == 'login' ? 'active' : '' ?>"><a href="<?= base_url("account/login") ?>"><?= __("Login") ?></a></li>
+                <?php else: ?>
+                    <li class="<?= @$active_tab == 'messages' ? 'active' : '' ?>"><a class='messages-handler has-count-badge' title='<?= __("Messages") ?>' href="<?= base_url("messages") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-envelope"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-envelope"></span><span style="display:inline-block;"><span class="pull-right badge" style="margin-<?= __("_main_side") ?>:10px;"><?= $new_chats_count ?></span>&nbsp; <?= __("Messages") ?></span></span></a></li>
+                    <li class="<?= @$active_tab == 'profile' ? 'active' : '' ?>"><a class='' title='<?= __("Your Account") ?>' href="<?= base_url("profile") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-user"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-user"></span>&nbsp; <?= __("Account") ?></span></a></li>
+                    <li class="<?= @$active_tab == 'logout' ? 'active' : '' ?>"><a class='' title='<?= __("Logout") ?>' href="<?= base_url("account/logout") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-log-out"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-off"></span>&nbsp; <?= __("Logout") ?></span></a></li>
+                    <li role="presentation" class="visible-xs divider"></li>
+                    <!--<li class="navbar-text">Welcome <strong><?= $this->currentUser()->presenter() ?></strong></li>-->
+
+                <?php endif; ?>
+            </ul>
+            <ul class="nav navbar-nav">
+                <?php if (!$controller->session->userdata('current_user')): ?>
+                    <li class="<?= @$active_tab == 'home' ? 'active' : '' ?>"><a href="<?= base_url("home") ?>"><?= __("Home") ?></a></li>
+                    <li class="<?= @$active_tab == 'about' ? 'active' : '' ?>"><a href="<?= base_url("about") ?>"><?= __("About") ?></a></li>
+                    <li class="<?= @$active_tab == 'contact_us' ? 'active' : '' ?>"><a href="<?= base_url("contact_us") ?>"><?= __("Contact Us") ?></a></li>
+                <?php else: ?>
+                    <li class="<?= @$active_tab == 'landing' ? 'active' : '' ?>">
+                        <a href="<?= base_url("landing") ?>" class="visible-xs"><i class="glyphicon glyphicon-home"></i>&nbsp; Your Home</a>
+                        <a href="<?= base_url("landing") ?>" class="hidden-xs"><i class="glyphicon glyphicon-home"></i></a>
+                    </li>
+                    <!--<li class="<?= @$active_tab == 'discussion' ? 'active' : '' ?>"><a href="<?= base_url("posts") ?>">Discussions</a></li>-->
+                    <li class="<?= @$active_tab == 'discussion' ? 'active' : '' ?> dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <!--<i class="glyphicon glyphicon-edit"></i>--> 
+                            <?= __("Discussions") ?> <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li class=""><a href="<?= base_url("posts") ?>"><i class="glyphicon glyphicon-list"></i> <?= __("List of discussions") ?></a></li>
+                            <li class=""><a href="<?= base_url("posts/create") ?>"><i class="glyphicon glyphicon-plus"></i> <?= __("New discussion") ?></a></li>
+                            <li class=""><a href="<?= base_url("posts/drafts") ?>"><i class="glyphicon glyphicon-floppy-saved"></i> <?= __("Your drafts") ?></a></li>
+                            <li class=""><a href="<?= base_url("posts/closed") ?>"><i class="glyphicon glyphicon-lock"></i> <?= __("Closed discussions") ?></a></li>
+                        </ul>
+                    </li>
+                    <!--<li class="<?= @$active_tab == 'files' ? 'active' : '' ?>"><a href="<?= base_url("files") ?>">Files</a></li>-->
+                    <li class="<?= @$active_tab == 'files' ? 'active' : '' ?> dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <!--<i class="glyphicon glyphicon-file"></i>--> 
+                            <?= __("Files") ?> <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li class=""><a href="<?= base_url("files") ?>"><i class="glyphicon glyphicon-list"></i> <?= __("List of files") ?></a></li>
+                            <li class=""><a href="<?= base_url("files/new") ?>"><i class="glyphicon glyphicon-upload"></i> <?= __("Upload new file") ?></a></li>
+                        </ul>
+                    </li>
+                    <?php if (CurrentUser::getInstance()->model()->checkRole(UserModel::ROLE_ADMIN)): ?>
+                        <li class="<?= @$active_tab == 'admin' ? 'active' : '' ?>">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                <!--<i class="glyphicon glyphicon-wrench"></i>--> 
+                                <?= __("Admin") ?> <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li class="<?= @$active_tab == 'users' ? 'active' : '' ?>"><a href="<?= base_url("users") ?>"><i class="glyphicon glyphicon-user"></i> <?= __("Users") ?></a></li>
+                                <li class="<?= @$active_tab == 'categories' ? 'active' : '' ?>"><a href="<?= base_url("categories") ?>"><i class="glyphicon glyphicon-th-large"></i> <?= __("Categories") ?></a></li>
+                                <li class="<?= @$active_tab == 'pages' ? 'active' : '' ?>"><a href="<?= base_url("pages/edit") ?>"><i class="glyphicon glyphicon-file"></i> <?= __("Static pages") ?></a></li>
+                                <!--                                <li class="divider"></li>
+                                                                <li><a href="#">Settings</a></li>-->
+                            </ul>
+                        </li>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $.extend(fw.logic, {
+        updateNewChatsCount: function() {
+            $(".messages-handler.has-count-badge .badge").load("<?= base_url("messages/new_chats_count") ?>");
+        },
+    });
+    $(function() {
+        setInterval("fw.logic.updateNewChatsCount()", 5000);
+    });
+</script>

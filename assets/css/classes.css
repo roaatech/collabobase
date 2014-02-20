@@ -1,0 +1,29 @@
+
+
+.border-left{
+    border-left:1px solid gray;
+}
+
+textarea.resize-disabled{
+    resize: none;
+}
+
+textarea.resize-horizontal{
+    resize: horizontal;
+}
+
+textarea.resize-vertical{
+    resize: vertical;
+}
+
+.width-100{
+    width:100%;
+}
+
+.width-50{
+    width:50%;
+}
+
+.start-hidden{
+    display: none;
+}

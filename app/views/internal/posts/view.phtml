@@ -1,0 +1,351 @@
+<?php
+/* @var $this MY_Loader */
+/* @var $post PostModel */
+/* @var $postCategory CategoryModel */
+
+function displayReply(PostPresenter $reply, CurrentUser $currentUser) {
+    $replyAllowed = $currentUser->canReplyToPost($reply->model());
+    ?>
+    <hr />
+    <div class="reply row" id="post-<?= $reply->id() ?>">
+        <div class="col-md-9 post-main-region">
+            <div class="text-muted hidden-lg hidden-md">
+                <?= __("Reply by ") ?><?= $reply->author() ?> <?= date_human($reply->time, $currentUser->timezone()) ?>.<br />
+            </div>
+            <h4><?= $reply->title() ?></h4>
+            <?= $reply->content() ?>
+
+        </div>
+        <div class="col-md-3 visible-lg visible-md">
+            <div class="post-side-region">
+                <div class="form-group">
+                    <label class="control-label"><?= __("Reply by") ?></label>
+                    <div class="form-control-static">
+                        <?= $reply->author() ?>.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><?= __("Reply on") ?></label>
+                    <div class="form-control-static"><?= $currentUser->dateTime($reply->time, "d/m/Y h:i a") ?>.</div>
+                </div>
+                <?php if ($reply->isModified()): ?>
+                    <div class="form-group">
+                        <label class="control-label"><?= __("Edited by") ?></label>
+                        <div class="form-control-static"><?= $currentUser->presenter()->me() ?>.</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"><?= __("Edited on") ?></label>
+                        <div class="form-control-static"><?= $currentUser->dateTime(date("Y-m-d H:i:s"), "d/m/Y h:i a") ?>.</div>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="after-side-region">
+                <ul class="nav nav-stacked">
+                    <?php if ($currentUser->canReplyToPost($reply->model())): ?>
+                        <li><a class="" href="#reply-area" onclick="replyTo(<?= $reply->id ?>)"><i class="glyphicon glyphicon-send"></i> <?= __("Reply to this reply") ?>.</a></li>
+                    <?php endif; ?>
+                    <?php if ($currentUser->canEditPost($reply->model())): ?>
+                        <li><a class="" href="<?= base_url("posts/edit/{$reply->id}") ?>"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit reply") ?>.</a></li>
+                        <li><a class="" href="#" onclick="fw.logic.confirmDeleteReply(<?= $reply->id ?>)"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete reply") ?>.</a></li>
+                    <?php endif; ?>
+                    <li><a class="" href="#post-<?= $reply->post_id ?>"><i class="glyphicon glyphicon-chevron-up"></i> <?= __("Go to original") ?>.</a></li>
+                    <li><a class="" href="#top"><i class="glyphicon glyphicon-arrow-up"></i> <?= __("Go to the top") ?>.</a></li>
+                </ul>
+            </div>
+        </div>
+        <ul class="nav-links hidden-lg hidden-md">
+            <?php if ($currentUser->canReplyToPost($reply->model())): ?>
+                <li><a class="" href="#reply-area" onclick="replyTo(<?= $reply->id ?>)"><i class="glyphicon glyphicon-send"></i> <?= __("Reply to this reply") ?>.</a></li>
+            <?php endif; ?>
+            <?php if ($currentUser->canEditPost($reply->model())): ?>
+                <li><a class="" href="<?= base_url("posts/edit/{$reply->id}") ?>"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit reply") ?>.</a></li>
+                <li><a class="" href="#" onclick="fw.logic.confirmDeleteReply(<?= $reply->id ?>)"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete reply") ?>.</a></li>
+            <?php endif; ?>
+            <li><a class="" href="#post-<?= $reply->post_id ?>"><i class="glyphicon glyphicon-chevron-up"></i> <?= __("Go to original") ?>.</a></li>
+            <li><a class="" href="#top"><i class="glyphicon glyphicon-arrow-up"></i> <?= __("Go to the top") ?>.</a></li>
+        </ul>
+    </div>
+    <?php
+}
+
+$postCategory = $post->category();
+?>
+<script type="text/javascript" src="<?= base_url("assets/js/summernote.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/summernote-me.css") ?>" />
+<style type="text/css">
+    @media (min-width: 992px){
+        .post-side-region{
+            background-color:#f8f8f8;
+            margin-top:-20px;
+            margin-bottom:-20px;
+            padding:20px;
+        }
+
+        .post-side-region .form-group:last-child{
+            padding-bottom: 0px;
+            margin-bottom: 0px;
+        }
+
+        .after-side-region{
+            margin:0px;
+            margin-top:30px;
+        }
+    }
+</style>
+<div class="container" id="top">
+
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small>
+                <?= $sub_title ?>
+            </small>
+        </h1>
+        <div class="text-muted">
+            <?= __("Posted by") ?> <?= $this->currentUser()->presenter() ?> <span class="post-category-display"><?= $postCategory ?></span> <?= date_human($post->time, $this->currentUser()->timezone()) ?>.
+        </div>
+    </div>
+    <div class="row" id="post-<?= $post->id() ?>">
+        <div class="col-md-9" id="form-main-col">
+            <?php if ($operation_result): ?>
+                <?= operationResult($operation_result) ?>
+            <?php endif; ?>
+            <div class="post-content"><?= $post->content ?></div>
+        </div>
+        <div class="col-md-3">
+            <div class="post-side-region">
+                <div class="form-group">
+                    <label class="control-label"><?= __("Posted by") ?></label>
+                    <div class="form-control-static">
+                        <?= $post->author() ?>.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label"><?= __("Category") ?></label>
+                    <div class="form-control-static post-category-display">
+                        <?= $postCategory ? $postCategory->name : __("Uncategorized") ?>.
+                    </div>
+                </div>
+                <?php if ($post->presenter()->tagsCsv() !== null): ?>
+                    <div class="form-group">
+                        <label class="control-label"><?= __("Tags") ?></label>
+                        <div class="form-control-static post-tag-display tags-list">
+                            <?= $post->presenter()->tagsCsv() ?>.
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <div class="form-group">
+                    <label class="control-label"><?= __("Posted on") ?></label>
+                    <div class="form-control-static"><?= $this->currentUser()->dateTime($post->time, "d/m/Y h:i a") ?>.</div>
+                </div>
+                <?php if ($post->isModified()): ?>
+                    <div class="form-group">
+                        <label class="control-label"><?= __("Edited by") ?></label>
+                        <div class="form-control-static"><?= $this->currentUser()->presenter()->me() ?>.</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"><?= __("Edited on") ?></label>
+                        <div class="form-control-static"><?= $this->currentUser()->dateTime(date("Y-m-d H:i:s"), "d/m/Y h:i a") ?>.</div>
+                    </div>
+                <?php endif; ?>
+                <div class="form-group">
+                    <label class="control-label"><?= __("Total replies") ?></label>
+                    <div class="form-control-static post-category-display">
+                        <?= $post->total_replies? : __("No") ?> <?= __("replies") ?>.
+                    </div>
+                </div>
+                <?php if (!$post->isOpen()): ?>
+                    <div class="form-group">
+                        <label class="control-label">Post is</label>
+                        <div class="form-control-static"><?= ucfirst($post->status) ?>.</div>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="after-side-region visible-lg visible-md">
+                <ul class="nav nav-stack">
+                    <?php if ($this->currentUser()->canReplyToPost($post)): ?>
+                        <li><a class="" href="#reply-area" onclick="replyTo(<?= $post->id ?>)"><i class="glyphicon glyphicon-send"></i> <?= __("Reply to this post") ?>.</a></li>
+                        <?php if ($this->currentUser()->isAdmin() || $this->currentUser()->isSupervisor()): ?>
+                            <li><a class="" href="#" onclick="fw.logic.confirmClosePost();"><i class="glyphicon glyphicon-lock"></i> <?= __("Close post") ?>.</a></li>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <?php if ($this->currentUser()->canEditPost($post)): ?>
+                        <li><a class="" href="<?= base_url("posts/edit/{$post->id}") ?>"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit post") ?>.</a></li>
+                        <li><a class="" href="#" onclick="fw.logic.confirmDeletePost(<?= $post->id ?>)"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete post") ?>.</a></li>
+                    <?php endif; ?>
+                    <li><a class="" href="#top"><i class="glyphicon glyphicon-arrow-up"></i> <?= __("Go to the top") ?>.</a></li>
+                </ul>
+            </div>
+        </div>
+        <ul class="nav-links hidden-lg hidden-md">
+            <?php if ($this->currentUser()->canReplyToPost($post)): ?>
+                <li><a class="" href="#reply-area" onclick="replyTo(<?= $post->id ?>)"><i class="glyphicon glyphicon-send"></i> <?= __("Reply to this post") ?>.</a></li>
+                <li><a class="" href="#" onclick="fw.logic.confirmClosePost();"><i class="glyphicon glyphicon-lock"></i> <?= __("Close post") ?>.</a></li>
+            <?php endif; ?>
+            <?php if ($this->currentUser()->canEditPost($post)): ?>
+                <li><a class="" href="<?= base_url("posts/edit/{$post->id}") ?>"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit post") ?>.</a></li>
+                <li><a class="" href="#" onclick="fw.logic.confirmDeletePost(<?= $post->id ?>)"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete post") ?>.</a></li>
+            <?php endif; ?>
+            <li><a class="" href="#top"><i class="glyphicon glyphicon-arrow-up"></i> <?= __("Go to the top") ?>.</a></li>
+        </ul>
+    </div>
+    <div class="replies">
+        <?php foreach ($replies as $reply): ?>
+            <?php /* @var $reply NotORM_Row */ ?>
+            <?= displayReply($reply->presenter(), $this->currentUser()) ?>
+        <?php endforeach; ?>
+    </div>
+    <?php if ($this->currentUser()->canReplyToPost($post)): ?>
+        <hr />
+        <div class="row" id="reply-area">
+            <div class="col-md-9">
+                <form id="reply-form" action="<?= base_url("posts/reply") ?>" method="post" class="form">
+                    <input type="hidden" name="poster_url" value="<?= $current_url ?>" />
+                    <input type="hidden" id="reply-post-id" name="post_id" value="<?= $post->id ?>" />
+                    <h3><?= __("Post a Reply") ?></h3>
+                    <div class="form-group">
+                        <label class="control-label" for="reply-title"><?= __("Title") ?></label>
+                        <input class="form-control" type="text" name="title" id="reply-title" value="Re: <?= $post->title ?>" placeholder="Reply title" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="reply-content"><?= __("Content") ?></label>
+                        <textarea id="reply-content" name="content" class="summernote required" required="required"></textarea>
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="reset" class="btn btn-default pull-left" name="reset" id="reply-reset" onclick="resetReply();"><?= __("Cancel") ?></button>&nbsp;
+                        <button type="submit" class="btn btn-primary" name="save" id="reply-submit" onclick="updateReplyContent();"><?= __("Save") ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+<?php if ($this->currentUser()->canEditPost($post)): ?>
+    <form id="delete-post-form" action="<?= base_url("posts/delete") ?>" method="post" class="hide">
+        <input type="hidden" name="id" id="delete-post-id" />
+    </form>
+<?php endif; ?>
+<?php if ($this->currentUser()->canEditPost($post)): ?>
+    <form id="close-post-form" action="<?= base_url("posts/close") ?>" method="post" class="hide">
+        <input type="hidden" name="id" value="<?= $post->id ?>" />
+    </form>
+    <script type="text/javascript">
+        jQuery(function() {
+            $.extend(fw.logic, {
+                confirmClosePost: function() {
+                    $.showdal({
+                        title: "<?= __("Confirm Close Discussion") ?>",
+                        body: "<?= __("Are you sure you want to close this discussion? No replies/edits can be added later!") ?>",
+                        buttons: {
+                            Delete: {
+                                title: "<i class='glyphicon glyphicon-lock'></i> <?= __("Close the discussion") ?>",
+                                class: "btn btn-primary",
+                                action: function(e) {
+                                    $(this).showdal("hide");
+                                    $("#close-post-form").submit();
+                                },
+                            },
+                            Cancel: {
+                                title: "<?= __("Cancel") ?>",
+                                class: "btn btn-default pull-left",
+                                action: function(e) {
+                                    $(this).showdal("hide");
+                                },
+                            },
+                        }
+                    });
+                },
+            });
+        });
+    </script>
+<?php endif; ?>
+<script type="text/javascript">
+
+    jQuery(function() {
+
+        $.extend(fw.logic, {
+            confirmDeletePost: function(postId) {
+                if (!postId)
+                    return;
+                $("#delete-post-id").val(postId);
+                $.showdal({
+                    title: "<?= __("Confirm Delete Discussion") ?>",
+                    body: "<?= __("Are you sure you want to delete this discussion and all its replies?") ?>",
+                    buttons: {
+                        Delete: {
+                            title: "<i class='glyphicon glyphicon-remove'></i> <?= __("Delete the discussion") ?>",
+                            class: "btn btn-danger",
+                            action: function(e) {
+                                $(this).showdal("hide");
+                                $("#delete-post-form").submit();
+                            },
+                        },
+                        Cancel: {
+                            title: "<?= __("Cancel") ?>",
+                            class: "btn btn-default pull-left",
+                            action: function(e) {
+                                $(this).showdal("hide");
+                            },
+                        },
+                    }
+                });
+            },
+            confirmDeleteReply: function(replyId) {
+                if (!replyId)
+                    return;
+                $("#delete-post-id").val(replyId);
+                $.showdal({
+                    title: "<?= __("Confirm Delete Reply") ?>",
+                    body: "<?= __("Are you sure you want to delete this reply?") ?>",
+                    buttons: {
+                        Delete: {
+                            title: "<i class='glyphicon glyphicon-remove'></i> <?= __("Delete the reply") ?>",
+                            class: "btn btn-danger",
+                            action: function(e) {
+                                $(this).showdal("hide");
+                                $("#delete-post-form").submit();
+                            },
+                        },
+                        Cancel: {
+                            title: "<?= __("Cancel") ?>",
+                            class: "btn btn-default pull-left",
+                            action: function(e) {
+                                $(this).showdal("hide");
+                            },
+                        },
+                    }
+                });
+            },
+        });
+        $(".summernote").summernote({
+            toolbar: [
+                ['style', ['style']], // no style button
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['help', ['fullscreen']],
+//                ['height', ['height']],
+//                ['insert', ['picture', 'link']], // no insert buttons
+//                ['table', ['table']], // no table button
+//                ['help', ['help']] //no help button
+            ]
+        });
+        $("#reply-form").submit(function() {
+            updateReplyContent();
+        });
+    });
+    function resetReply() {
+        $(".summernote").code("");
+    }
+
+    function updateReplyContent() {
+        $("#reply-form textarea#reply-content").val($(".summernote").code());
+    }
+
+    function replyTo(postId) {
+        $("#reply-post-id").val(postId);
+    }
+
+</script>

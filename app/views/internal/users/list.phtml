@@ -1,0 +1,120 @@
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small><?= $sub_title ?></small>
+        </h1>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <?php if ($display_message): ?>
+                <div class="alert <?= $result_type ?> alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <strong>Message: </strong> <?= $result_message ?>
+                </div>
+            <?php endif; ?>
+
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th><?= __("Username") ?></th>
+                        <th class="hidden-xs"><?= __("Real Name") ?></th>
+                        <th><?= __("Role") ?></th>
+                        <th class="hidden-xs"><?= __("Status") ?></th>
+                        <th class="hidden-xs hidden-sm hidden-md"><?= __("Created") ?></th>
+                        <th><?= __("Posts") ?></th>
+                        <th class="hidden-xs"><?= __("Files") ?></th>
+                        <th class="hidden-xs"><?= __("Comments") ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php $i = ($current_page - 1) * $records_per_page + 1; ?>
+                    <?php foreach ($users as $user): ?>
+                        <tr>
+                            <td><?= $i++ ?></td>
+                            <td><?= $user['username'] ?></td>
+                            <td class="hidden-xs"><?= $user['first_name'] . " " . $user['last_name'] ?></td>
+                            <td><?= pass($user['role'], 'csv_ucfirst') ?></td>
+                            <td class="hidden-xs"><?= $user->user_information['status'] ?></td>
+                            <td class="hidden-xs hidden-sm hidden-md"><?= $this->currentUser()->dateTime($user->user_information['creation_date'], 'Y/m/d') ?></td>
+                            <td><?= $user->post("post_id is null")->count() ?></td>
+                            <td class="hidden-xs"><?= $user->file()->count() ?></td>
+                            <td class="hidden-xs"><?= $user->post("post_id is not null")->count() ?></td>
+                            <td><a href='<?= base_url("users/view/" . $user['id']) ?>'><?= __("View") ?></a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                </tfoot>
+            </table>
+
+            <?php if ($total_pages > 1): ?>
+                <ul class="pagination pull-right">
+                    <li class="<?= $current_page == 1 ? "disabled" : "" ?>"><a href="<?= $current_page > 1 ? base_url("users/" . ($current_page - 1)) : "#" ?>">&laquo;</a></li>
+                    <?php $start = $current_page - 2; ?>
+                    <?php if ($start + 4 > $total_pages) $start-=$start + 4 - $total_pages; ?>
+                    <?php if ($start < 1) $start = 1; ?>
+                    <?php for ($i = $start; $i < $start + 5 && $i <= $total_pages; $i++): ?>
+                        <li class="<?= $i == $current_page ? "active" : "" ?>"><a href="<?= $i == $current_page ? "#" : base_url("users/$i") ?>"><?= $i ?></a></li>
+                    <?php endfor; ?>
+                    <li class="<?= $current_page == $total_pages ? "disabled" : "" ?>"><a href="<?= $current_page < $total_pages ? base_url("users/" . ($current_page + 1)) : "#" ?>">&raquo;</a></li>
+                </ul>
+            <?php endif; ?>
+
+            <small>
+                <?= __("Records") ?> <?= ($current_page - 1) * $records_per_page + 1 ?> - <?= int_in_range($current_page * $records_per_page, 0, $total_results, 0) ?> <?= __("from") ?> <?= $total_results ?>
+            </small>
+
+        </div>
+        <div class="col-md-4">
+            <div class="side-region white">
+                <h3><?= __("Create New User") ?></h3>
+                <?php if ($has_errors == true): ?>
+                    <div class="has-error" style="margin-bottom:10px;">
+                        <?= validation_errors("<div class='control-label'>", "</div>") ?>
+                    </div>
+                <?php endif; ?>
+                <form action='<?= base_url("users/create") ?>' method="post" class="form form-horizontal clearfix">
+                    <div class="form-group">
+                        <label class="control-label col-xs-4" for="usernameTxt"><?= __("Username") ?></label>
+                        <span class="col-xs-8">
+                            <input class="form-control required" required="required" id="usernameTxt" name="username" type="text" placeholder="<?= __("Username") ?>" value="<?= set_value('username') ?>" />
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-xs-4" for="userRoleLst"><?= __("User Role") ?></label>
+                        <span class="col-xs-8">
+                            <select class="form-control required" required="required" id="userRoleLst" name="role" placeholder="<?= __("User Role") ?>">
+                                <option value="user"><?= __("User") ?></option>
+                                <option value="supervisor"><?= __("Supervisor") ?></option>
+                                <option value="admin"><?= __("Admin") ?></option>
+                            </select>
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-xs-4" for="firstnameTxt"><?= __("First Name") ?></label>
+                        <span class="col-xs-8">
+                            <input class="form-control required" required="required" id="firstnameTxt" name="firstname" type="text" placeholder="<?= __("First Name") ?>" value="<?= set_value('firstname') ?>" />
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-xs-4" for="lastnameTxt"><?= __("Last Name") ?></label>
+                        <span class="col-xs-8">
+                            <input class="form-control required" required="required" id="lastnameTxt" name="lastname" type="text" placeholder="<?= __("Last Name") ?>" value="<?= set_value('lastname') ?>" />
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-xs-4" for="noteTxt"><?= __("Note") ?></label>
+                        <span class="col-xs-8">
+                            <textarea class="form-control resize-vertical" id="noteTxt" name="note" placeholder="<?= __("Note") ?>"><?= set_value('note') ?></textarea>
+                        </span>
+                    </div>
+                    <button type="submit" class="btn btn-primary pull-right"><?= __("Create") ?></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

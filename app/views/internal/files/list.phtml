@@ -1,0 +1,251 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $files ResultSetPaginator */ ?>
+<?php /* @var $current_user CurrentUser */ ?>
+<?php /* @var $handler PaginatorHandler */ ?>
+<style type="text/css">
+
+    @media screen{
+        table#data-table tr#data-table-header th{
+            vertical-align: middle;
+        }
+
+        table#data-table tr#data-table-header th.sortable{
+            padding-right:24px;
+            background-repeat: no-repeat;
+            background-image: url(<?= base_url("assets/images/sort.png") ?>);
+            background-position: right center;
+        }
+        table#data-table tr#data-table-header th.sortable.asc{
+            background-image: url(<?= base_url("assets/images/sort-asc.png") ?>);
+        }
+        table#data-table tr#data-table-header th.sortable.desc{
+            background-image: url(<?= base_url("assets/images/sort-desc.png") ?>);
+        }
+
+    }
+
+    /*sm*/
+    @media screen and (min-width: 768px){
+        #form-controls{
+            margin-bottom:10px;
+        }
+
+        #list-category, #list-author{
+            width: 100%;
+        }
+    }
+
+    /*med*/
+    @media screen and (min-width: px){
+    }
+
+    /*lg*/
+    @media screen and (min-width: 1200px){
+    }
+
+    @media screen and (max-width: 767px){
+
+        #form-controls #buttons .btn{
+            display:block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+    }
+
+</style>
+<div class="container">
+
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="visible-xs" />
+            <div class="visible-sm pull-right">
+                <a class="btn btn-primary btn-md" href="<?= base_url('posts/create') ?>"><i class="glyphicon glyphicon-plus-sign"></i> <?= __("New Discussion") ?></a>
+            </div>
+            <small>
+                <?= __($sub_title) ?>
+            </small>
+        </h1>
+    </div>
+
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+
+    <form id="search-and-filter" class="form form-inline" method="get">
+        <input type="hidden" id="sort-by" name="sort" value="lastActivity" />
+        <input type="hidden" id="sort-direction" name="direction" value="desc" />
+        <!--<div class="side-region white" style="padding:5px;">-->
+        <div class="row" id="form-controls">
+            <div class="col-sm-4 col-md-3 hidden-sm" id="buttons">
+                <a class="btn btn-primary btn-md" href="<?= base_url('posts/create') ?>"><i class="glyphicon glyphicon-plus-sign"></i> <?= __("New Discussion") ?></a>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <div class="form-group" id="category-region">
+                    <label class="control-label sr-only" for="list-category"><?= __("Author") ?></label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <?= __("Author") ?>
+                        </span>
+                        <select name="author" class="form-control" id="list-author" onchange="fw.logic.submitForm(this);">
+                            <option value=""><?= __("All authors") ?></option>
+                            <?= $users->asSelectListOptions($selected_author) ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <div class="form-group" id="category-region">
+                    <label class="control-label sr-only" for="list-category"><?= __("Category") ?></label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <?= __("Category") ?>
+                        </span>
+                        <select name="category" class="form-control" id="list-category" onchange="fw.logic.submitForm(this);">
+                            <option value=""><?= __("All categories") ?></option>
+                            <option value="uncategorized" <?= $selected_category == "uncategorized" ? "selected='selected'" : "" ?>><?= __("Uncategorized") ?></option>
+                            <?= $categories->asSelectListOptionsTree($selected_category) ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <div class="form-group" id="search-region">
+                    <label class="control-label sr-only" id="search-text"><?= __("Search") ?></label>
+                    <div class="input-group">
+                        <input class="input form-control" id="search-text" type="search" name="search" placeholder="<?= __("search") ?>" value="<?= $search ?>" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" id="update-list">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--</div>-->
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped table-bordered" id="data-table">
+            <tr id="data-table-header">
+                <th style="width:5%">#</th>
+                <th>Category</th>
+                <th class="sortable" data-sort-by="title"><?= __("Title") ?></th>
+                <th class="sortable" data-sort-by="author"><?= __("By") ?></th>
+                <th class="sortable" data-sort-by="time"><?= __("Time") ?></th>
+                <th class="sortable" data-sort-by="version"><?= __("Version") ?></th>
+                <!--<th class="sortable" data-sort-by="last-active">Updater</th>-->
+                <th class="sortable" data-sort-by="updated"><?= __("Updated") ?></th>
+                <th style="width:3%"></th>
+            </tr>
+            <?php if ($files->getTotal() > 0): ?>
+                <?php foreach ($files as $i => $file): ?>
+                    <?php /* @var $file FilePresenter */ ?>
+                    <tr>
+                        <td><?= $i ?></td>
+                        <td><?= $file->category()? : __("Uncategorized") ?></td>
+                        <td><?= $file->title ?></td>
+                        <td><?= $file->uploader() ?></td>
+                        <td><?= ucfirst(date_human($file->time, $current_user->timezone())) ?></td>
+                        <td><?= $file->version ?></td>
+                        <!--<td><?= $file->lastUpdater() ?></td>-->
+                        <td><?= ucfirst(date_human($file->update_time, $current_user->timezone())) ?></td>
+                        <td style="font-size:125%">
+                            <a href="<?= FilePermaLink::view($file->id) ?>">
+                                <i class="glyphicon glyphicon-circle-arrow-<?= __("_sub_side") ?>"></i>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <td colspan="8">
+                    <small class="text-muted">
+                        <?= __("No files are matching ") ?><?= $search ? __("the search '") . $search . __("' you have entered") : "" ?> <?= $search && $selected_category ? __("and") : "" ?> <?= $selected_category ? __("the category you have selected") : "" ?>!
+                    </small>
+                </td>
+            <?php endif; ?>
+        </table>
+    </div>
+    <div>
+        <?php if ($files->getPagesCount() > 1): ?>
+            <ul class="pagination pull-right">
+                <li class="<?= $files->getCurrentPage() == 1 ? "disabled" : "" ?>"><a href="<?= $files->getCurrentPage() > 1 ? base_url("files/" . ($files->getCurrentPage() - 1) . "?$qs") : "#" ?>">&laquo;</a></li>
+                <?php $start = $files->getCurrentPage() - 2; ?>
+                <?php if ($start + 4 > $files->getPagesCount()) $start-=$start + 4 - $files->getPagesCount(); ?>
+                <?php if ($start < 1) $start = 1; ?>
+                <?php
+                for ($i = $start; $i < $start + 5 && $i <= $files->getPagesCount(); $i++):
+                    ?>
+                    <li class="<?= $i == $files->getCurrentPage() ? "active" : "" ?>"><a href="<?= $i == $files->getCurrentPage() ? "#" : base_url("files/$i" . "?$qs") ?>"><?= $i ?></a></li>
+                <?php endfor; ?>
+                <li class="<?= $files->getCurrentPage() == $files->getPagesCount() ? "disabled" : "" ?>"><a href="<?= $files->getCurrentPage() < $files->getPagesCount() ? base_url("files/" . ($files->getCurrentPage() + 1) . "?$qs") : "#" ?>">&raquo;</a></li>
+            </ul>
+        <?php endif; ?>
+
+        <small>
+            <?= __("Files") ?> <?= $files->getStart() ?> - <?= $files->getEnd() ?> <?= __("from") ?> <?= $files->getTotal() ?>.
+        </small>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function() {
+        $.extend(fw.temporary, {
+            files: {
+                list: {
+                    order: {
+                        column: '<?= $sort_by_column ?>',
+                        direction: '<?= $sort_by_direction ?>',
+                    }
+                }
+            }
+        });
+        $.extend(fw.logic, {
+            submitForm: function(object) {
+                if (object === undefined) {
+                    object = $("button#update-list").get(0);
+                }
+                $(object).closest("form").submit();
+            },
+            sortBy: function(e) {
+                object = this;
+                if (!$(object).hasClass('sortable')) {
+                    return;
+                }
+                if (fw.temporary.files.list.order.column != $(object).data('sort-by')) {
+                    fw.temporary.files.list.order.column = $(object).data('sort-by');
+                    fw.temporary.files.list.order.direction = 'asc';
+                } else {
+                    if (fw.temporary.files.list.order.direction == 'asc') {
+                        fw.temporary.files.list.order.direction = 'desc';
+                    } else {
+                        fw.temporary.files.list.order.direction = 'asc';
+                    }
+                }
+                fw.logic.submitForm();
+            },
+            formSubmitHandler: function(e) {
+                $(this).find("#sort-by").val(fw.temporary.files.list.order.column);
+                $(this).find("#sort-direction").val(fw.temporary.files.list.order.direction);
+                return true;
+            },
+        });
+
+        $("#data-table-header th.sortable").each(function() {
+            console.log(this);
+            console.log($(this).data('sort-by'));
+            console.log(fw.temporary.files.list.order.column);
+            $(this).click(fw.logic.sortBy).css("cursor", "pointer");
+            if (fw.temporary.files.list.order.column == $(this).data('sort-by')) {
+                console.log(this);
+                $(this).addClass(fw.temporary.files.list.order.direction);
+            }
+        });
+
+        $("form#search-and-filter").submit(fw.logic.formSubmitHandler);
+    });
+
+</script>

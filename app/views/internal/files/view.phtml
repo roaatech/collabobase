@@ -1,0 +1,253 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $file FilePresenter */ ?>
+<?php /* @var $current_user CurrentUser */ ?>
+<?php /* @var $versions FileVersionPresenter */ ?>
+<script type="text/javascript" src="<?= base_url("assets/js/summernote.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/summernote-me.css") ?>" />
+<style>
+    #file-information .side-region a.btn{
+        display:block;
+        margin-bottom: 10px;
+        width:100%;
+    }
+
+    @media screen and (min-width:768px){
+
+        #file-text{
+            padding-bottom: 30px;
+        }
+
+        #admin-options{
+            position: absolute; 
+            bottom:15px; 
+            <?= __("_main_side") ?>: 15px;
+        }
+
+        #file-information .side-region a.btn{
+            margin-bottom:0px;
+        }
+    }
+</style>
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="visible-xs" />
+            <small>
+                <a href="<?= base_url("files") ?>">
+                    <?= $sub_title ?>
+                </a>
+                &gt;
+                <?= $file->title ?>
+            </small>
+        </h1>
+    </div>
+
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+
+    <div class="side-region white" style="position: relative;">
+        <div class="row" id="file-information">
+            <div class="col-sm-7 col-md-8 col-lg-9">
+                <div id="file-text">
+                    <h3>
+                        <?= __("File description") ?>
+                    </h3>
+                    <?= strip_tags($file->description(), "<ul><li><br><p><ol>") ?>
+                </div>
+            </div>
+            <div class="col-sm-5 col-md-4 col-lg-3">
+                <div class="side-region" style="margin-bottom:0px;">
+                    <div class="form form-horizontal">
+                        <div class="form-group">
+                            <label class="control-label col-sm-5 col-md-4"><?= __("Category") ?></label>
+                            <div class="form-control-static col-sm-7 col-md-8"><?= $category ?></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-5 col-md-4"><?= __("Versions") ?></label>
+                            <div class="form-control-static col-sm-7 col-md-8">
+                                <?= $file->version ?> (<?= __("latest") ?>)
+                                <!--<a href="<?= FilePermaLink::allVersions($file->id) ?>">See all versions.</a>-->
+                            </div>
+                            <?php foreach ($versions->order("version desc") as $id => $version): ?>
+                                <?php if ($id != $file->last_version_id): ?>
+                                    <div class="form-control-static col-sm-7 col-md-8 col-sm-push-5 col-md-push-4">
+                                        <a href="#comment-<?= $version->post_id ?>"><?= $version->version ?></a>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-5 col-md-4"><?= __("Tags") ?></label>
+                            <div class="form-control-static col-sm-7 col-md-8"><?= $tags ?></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-5 col-md-4"><?= __("Size") ?></label>
+                            <div class="form-control-static col-sm-7 col-md-8"><?= $file->lastVersion()->size("kb") ?> <?= __("KB") ?></div>
+                        </div>
+                        <a href="<?= FilePermaLink::download($file->id) ?>" class="btn btn-primary btn-md width-100" role="button"><i class="glyphicon glyphicon-download"></i> <?= __("Download Latest Version") ?></a>
+                        <?php if ($current_user->canEditFile($file->model())): ?>
+                            <div class="visible-xs">
+                                <a href="<?= FilePermaLink::newVersion($file->id) ?>" class="btn btn-default" role="button"><i class="glyphicon glyphicon-upload"></i> <?= __("Upload new version") ?></a>
+                                <a href="<?= FilePermaLink::editFile($file->id) ?>" class="btn btn-default" role="button"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit file") ?></a>
+                                <a onclick="fw.logic.deleteFile();" class="btn btn-default" role="button"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete file") ?></a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php if ($current_user->canEditFile($file->model())): ?>
+            <div id="admin-options" class="hidden-xs">
+                <a href="<?= FilePermaLink::newVersion($file->id) ?>" class="btn btn-default btn-sm" role="button"><i class="glyphicon glyphicon-upload"></i> <?= __("Upload new version") ?></a>
+                <a href="<?= FilePermaLink::editFile($file->id) ?>" class="btn btn-default btn-sm" role="button"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit file") ?></a>
+                <a onclick="fw.logic.deleteFile();" class="btn btn-default btn-sm" role="button"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete file") ?></a>
+            </div>
+        <?php endif; ?>
+    </div>
+    <div id="file-comments" class="row">
+        <div class="col-sm-7 col-md-8 col-lg-9">
+            <h3><?= __("Comments on the file") ?>:</h3>
+            <?php foreach ($file->comments()->order('time desc') as $comment): ?>
+                <?php if ($comment->isVersion() && $comment->getVersion()->status == 'deleted'): ?>
+                    <?php continue; ?>
+                <?php endif; ?>
+                <hr />
+                <?php /* @var $comment FileCommentPresenter */ ?>
+                <div class="comment" id="comment-<?= $comment->id ?>">
+                    <div class="text-muted"><?= $comment->author() ?> <?= __("on") ?> <?= $comment->time("d/m/Y h:i a", $current_user->timezone()) ?>: </div>
+                    <div class="lead">
+                        <?php if ($comment->isVersion()): ?>
+                            <?= __("Version") ?> <?= $comment->getVersion() ?> <?= __("is there") ?>.
+                        <?php else: ?>
+                            <?= $comment->title() ?>
+                        <?php endif; ?>
+                    </div>
+                    <?= $comment->content() ?>
+                    <?php if ($comment->isVersion()): ?>
+                        <div>
+                            <a class="btn btn-primary btn-sm" href="<?= FilePermaLink::download($file->id, $comment->getVersion()->id) ?>"><i class="glyphicon glyphicon-download"></i> <?= __("Download") ?> (<?= $comment->getVersion()->size("kb") ?> <?= __("KB") ?>)</a>
+                            <?php if ($current_user->canEditFile($file->model())): ?>
+                                <a class="btn btn-default btn-sm" onclick="fw.logic.deleteFileVersion(<?= $comment->getVersion()->id ?>)"><i class="glyphicon glyphicon-remove"></i> <?= __("Delete") ?></a>
+                                <!--<a class="btn btn-default btn-sm" href="<?= FilePermaLink::editVersion($comment->getVersion()->id) ?>"><i class="glyphicon glyphicon-edit"></i> Edit</a>-->
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+            <hr />
+            <form class="form" action="<?= FilePermaLink::addComment($file->id) ?>" method="post">
+                <h3><?= __("Add comment") ?>:</h3>
+                <div class="form-group">
+                    <!--<label class="control-label col-md-2" for="reply-title">Reply Title</label>-->
+                    <input class="form-control" type="text" id="reply-title" name="title" placeholder="<?= __("Title") ?>" />
+                </div>
+                <div class="form-group">
+                    <!--<label class="control-label col-md-2" for="reply-title">Reply Title</label>-->
+                    <textarea class="form-control resize-vertical" id="reply-content" name="content" placeholder="<?= __("Reply") ?>)"></textarea>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary pull-right" type="submit"><i class="glyphicon glyphicon-send"></i> <?= __("Send") ?></button>&nbsp;
+                    <button class="btn btn-default" type="reset"><?= __("Reset") ?></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php if ($current_user->canEditFile($file->model())): ?>
+    <div class="hide">
+        <form id="delete-file-form" action="<?= FilePermaLink::removeFile($file->id) ?>" method="post">
+        </form>
+        <div id="delete-file-modal">
+            <?= __("Are you sure you want to delete this file?") ?>
+            <br />
+            <br />
+            <div class="text-danger">
+                <strong><?= __("Warning") ?>!</strong> <?= __("All the versions, files, and comments will be deleted and can not be recovered back!") ?>
+            </div>
+            <br />
+            <?= __("Do you want to continue?") ?>
+        </div>
+        <form id="delete-file-version-form" action="<?= FilePermaLink::removeVersion($file->id) ?>" method="post">
+            <input type="hidden" id="remove-versoin-id" name="versionId" value="" />
+        </form>
+        <div id="delete-file-version-modal">
+            <?= __("Are you sure you want to delete this version?") ?>
+            <br />
+            <br />
+            <div class="text-danger">
+                <strong><?= __("Warning") ?>!</strong> <?= __("Once deleted, this action can not be reverted back!") ?>
+            </div>
+            <br />
+            <?= __("Do you want to continue?") ?>
+        </div>
+    </div>
+    <script>
+        $.extend(fw.logic, {
+            deleteFile: function() {
+                $("#delete-file-modal").showdal({
+                    copy: true,
+                    title: "<?= __("Confirm file deletion") ?>",
+                    buttons: {
+                        Cancel: {
+                            action: function() {
+                                $(this).showdal('hide');
+                            },
+                            title: "<i class='glyphicon glyphicon-remove'></i> <?= __("Cancel") ?>",
+                            class: "btn-default pull-left",
+                        },
+                        Delete: {
+                            action: function() {
+                                $(this).showdal('hide');
+                                $("#delete-file-form").submit();
+                            },
+                            title: "<i class='glyphicon glyphicon-check'></i> <?= __("Delete") ?>",
+                            class: "btn-danger"
+                        },
+                    },
+                });
+            },
+            deleteFileVersion: function(id) {
+                $("#remove-versoin-id").val(id);
+                $("#delete-file-version-modal").showdal({
+                    copy: true,
+                    title: "<?= __("Confirm version deletion") ?>",
+                    buttons: {
+                        Cancel: {
+                            action: function() {
+                                $(this).showdal('hide');
+                            },
+                            title: "<i class='glyphicon glyphicon-remove'></i> <?= __("Cancel") ?>",
+                            class: "btn-default pull-left",
+                        },
+                        Delete: {
+                            action: function() {
+                                $(this).showdal('hide');
+                                $("#delete-file-version-form").submit();
+                            },
+                            title: "<i class='glyphicon glyphicon-check'></i> <?= __("Delete") ?>",
+                            class: "btn-danger"
+                        },
+                    },
+                });
+            },
+        });
+    </script>
+<?php endif; ?>
+<script>
+    $("#reply-content").summernote({
+        toolbar: [
+            ['style', ['style']], // no style button
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['help', ['fullscreen']],
+//                ['height', ['height']],
+//                ['insert', ['picture', 'link']], // no insert buttons
+//                ['table', ['table']], // no table button
+//                ['help', ['help']] //no help button
+        ]
+    });
+</script>

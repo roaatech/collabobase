@@ -1,0 +1,127 @@
+<style>
+    @media screen{
+        #quick-links{
+            margin-right:-10px;
+            margin-left: -10px;
+        }
+
+        #quick-links div{
+            text-align: center;
+        }
+
+        #quick-links > div{
+            padding-right:10px;
+            padding-left:10px;
+        }
+
+        #quick-links a{
+            text-align: center;
+            border-radius: 5px;
+            display: block;
+            padding: 10px;
+            /*background-color: #f0f0f0;*/
+            border:1px solid #ebebeb;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        #quick-links a i{
+            font-size:250%;
+        }
+    }
+
+    @media screen and (max-width:479px){
+
+        #quick-links > div{
+            width: 50%;
+        }
+
+    }
+</style>
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <?= __("Welcome back") ?>
+            <br class="hidden-lg hidden-md" />
+            <small>
+                <?= $this->currentUser()->model()->col('username') ?>
+            </small>
+        </h1>
+    </div>
+    <div class="row" id="quick-links">
+        <div class="col-xs-4 col-sm-3 col-md-2">
+            <h3 style="margin:0px;">
+                <i class="glyphicon glyphicon-star-empty"></i><br />
+                <?= __("Quick<br />Access") ?>
+            </h3>
+        </div>
+        <div class="col-xs-4 col-sm-3 col-md-2">
+            <a href="<?= base_url("posts/create") ?>" title="<?= __("New Discussion") ?>">
+                <i class="glyphicon glyphicon-plus"></i><br /><?= __("New Discussion") ?>
+            </a>
+        </div>
+        <div class="col-xs-4 col-sm-3 col-md-2">
+            <a href="<?= base_url("files/new") ?>" title="<?= __("New File") ?>">
+                <i class="glyphicon glyphicon-upload"></i><br /><?= __("New File") ?>
+            </a>
+        </div>
+        <div class="col-xs-4 col-sm-3 col-md-2">
+            <a href="<?= base_url("messages/create") ?>" title="<?= __("New Message") ?>">
+                <i class="glyphicon glyphicon-envelope"></i><br /><?= __("New Message") ?>
+            </a>
+        </div>
+        <div class="col-xs-4 col-sm-3 col-md-2">
+            <a href="<?= base_url("posts/drafts") ?>" title="<?= __("Draft Discussions") ?>">
+                <i class="glyphicon glyphicon-edit"></i><br /><?= __("Your Drafts") ?>
+            </a>
+        </div>
+        <div class="col-xs-4 col-sm-3 col-md-2">
+            <a href="<?= base_url("profile/change_password") ?>" title="<?= __("Change Your Password") ?>">
+                <i class="glyphicon glyphicon-lock"></i><br /><?= __("Change Password") ?>
+            </a>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <a href="<?= base_url("posts") ?>" class="hidden-xs pull-right" style="margin-top:35px;" title="<?= __("All Discussions") ?>"><?= __("View All") ?></a>
+            <h3>
+                <i class="glyphicon glyphicon-comment"></i>
+                <?= __("Last Discussions") ?>
+            </h3>
+            <a href="<?= base_url("posts") ?>" class="visible-xs" style="margin:10px 0px;" title="<?= __("All Discussions") ?>"><?= __("View All") ?></a>
+            <div class="list-group">
+                <?php foreach ($posts as $post): ?>
+                    <?php /* @var $post PostPresenter */ ?>
+                    <a href="<?= PostPermaLink::view($post->id) ?>" class="list-group-item" style="">
+                        <h4 class="list-group-item-heading">
+                            <i class="glyphicon glyphicon-circle-arrow-<?= __("_sub_side") ?> pull-right"></i>
+                            <?= $post->title() ?>
+                        </h4>
+                        <p class="list-group-item-text" style="padding-<?= __("_sub_side") ?>:30px;"><?= $post->scrambled() ?></p>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <a href="<?= base_url("files") ?>" class="hidden-xs pull-right" style="margin-top:35px;" title="<?= __("All Files") ?>"><?= __("View All") ?></a>
+            <h3>
+                <i class="glyphicon glyphicon-file"></i>
+                <?= __("Last Files") ?>
+            </h3>
+            <a href="<?= base_url("files") ?>" class="visible-xs" style="margin:10px 0px;" title="<?= __("All Files") ?>"><?= __("View All") ?></a>
+            <div class="list-group">
+                <?php foreach ($files as $file): ?>
+                    <?php /* @var $file FilePresenter */ ?>
+                    <a href="<?= FilePermaLink::view($file->id) ?>" class="list-group-item" style="">
+                        <h4 class="list-group-item-heading">
+                            <i class="glyphicon glyphicon-circle-arrow-<?= __("_sub_side") ?> pull-right"></i>
+                            <?= $file->title ?>
+                        </h4>
+                        <p class="list-group-item-text" style="padding-<?= __("_sub_side") ?>:30px;"><?= $file->post()->scrambled() ?></p>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>

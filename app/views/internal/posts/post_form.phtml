@@ -1,0 +1,337 @@
+<?php
+/* @var $this MY_Loader */
+/* @var $post PostModel */
+/* @var $postCategory CategoryModel */
+
+function echoList($categories, CategoryModel $selectedCategory = null) {
+
+    static $level = 1;
+    $prepend = str_repeat("&nbsp;", $level * 3);
+
+    if ($selectedCategory) {
+        $selected = $selectedCategory->id;
+    } else {
+        $selected = "";
+    }
+
+    $result = "";
+    foreach ($categories as $id => $category) {
+        $result.="<option value='{$id}' " . ($selected == $id ? "selected='selected'" : "") . ">$prepend{$category['data']['name']}</option>";
+        if (array_key_exists('children', $category)) {
+            $level++;
+            $result.=echoList($category['children'], $selectedCategory);
+            $level--;
+        }
+    }
+    return $result;
+}
+
+function statusBadge($status) {
+    switch (strtolower($status)) {
+        case PostModel::STATUS_ACTIVE:
+            return "badge-success";
+        case PostModel::STATUS_DELETED:
+            return "badge-warning";
+        case PostModel::STATUS_DRAFT:
+            return "badge-important";
+        case PostModel::STATUS_PENDING:
+            return "badge-info";
+    }
+}
+
+$postCategory = $post->category();
+$isModification = $post->col("id") !== null;
+?>
+<script type="text/javascript" src="<?= base_url("assets/js/summernote.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/summernote-me.css") ?>" />
+<script type="text/javascript" src="<?= base_url("assets/js/selectize.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/selectize.bootstrap3.css") ?>" />
+<style type="text/css">
+    @media (min-width: 992px){
+        #form-side-rgion{
+            background-color:#f8f8f8;
+            margin-top:-20px;
+            margin-bottom:-20px;
+            padding:20px;
+            /*min-height: 350px;*/
+        }
+    }
+
+    .tags-list{
+
+    }
+</style>
+<div class="container">
+
+    <div class="page-header">
+        <span class="pull-right hidden-xs text-center"><br /><span class="badge <?= statusBadge($post->status) ?>"><?= __(ucfirst($post->presenter()->status())) ?></span></span>
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small class="edit-mode">
+                <?= __($sub_title) ?>
+            </small>
+            <small class="preview-mode start-hidden post-title">
+            </small>
+        </h1>
+        <div class="text-muted preview-mode start-hidden">
+            <?= __("Posted by") ?> <?= $this->currentUser()->presenter() ?> <?= __("in") ?> <span class="post-category-display"><?= $postCategory ?></span> <?= date_human($post->time, $this->currentUser()->timezone()) ?>.
+        </div>
+        <div class="text-muted edit-mode visible-xs">
+            <?= __("This post is") ?> <span class=""><?= __(ucfirst($post->presenter()->status())) ?></span>.
+        </div>
+    </div>
+    <form id="post-form" class="form" method="post" action="<?= base_url("posts/submit") ?>">
+        <input type="hidden" name="post_id" value="<?= $post->id ?>" />
+        <input type="hidden" name="poster_url" value="<?= $current_url ?>" />
+        <div class="row">
+            <div class="col-md-9" id="form-main-col">
+                <div class="edit-mode">
+                    <?php if ($operation_result): ?>
+                        <?= operationResult($operation_result) ?>
+                    <?php endif; ?>
+                    <div class="form-group">
+                        <input type="text" class="form-control required" required="required" id="post-title" name="title" placeholder="<?= __("Post title") ?>" value="<?= $post->title ?>" />
+                    </div>
+                    <div class="form-group">
+                        <textarea class="visible-but-hide post-content" id="post-content" name="content" placeholder="<?= __("Post content") ?>"></textarea>
+                        <div id="post-content-editor"><?= $post->content ?></div>
+                    </div>
+                </div>
+                <div class="preview-mode start-hidden post-content" id="post-content-preview"></div>
+            </div>
+            <div class="col-md-3" id="form-side-col">
+                <div id="form-side-rgion" class="" style="">
+                    <div class="edit-mode">
+                        <?php if ($post->isRootPost()): ?>
+                            <div class="form-group">
+                                <label class="control-label" for="post-category"><?= __("Category") ?></label>
+                                <select name="category" id="post-category" class="form-control">
+                                    <option value=""><?= __("Uncategorized") ?></option>
+                                    <?= echoList($categories, $postCategory? : null) ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="post-tag"><?= __("Tags") ?></label>
+                                <textarea id="post-tag" name="tag" class="form-control" placeholder="<?= __("Write post tags") ?>"><?= $post->presenter()->tagsCsv() ?></textarea>
+                            </div>
+                        <?php else: ?>
+                            <div class="form-group">
+                                <!--<div class="text-muted">This post has no options as it is a reply to another post.</div>-->
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="preview-mode">
+                        <div class="form-group">
+                            <label class="control-label"><?= __("Posted by") ?></label>
+                            <div class="form-control-static"><?= $post->author() ?></div>
+                        </div>
+                        <?php if ($post->isRootPost()): ?>
+                            <div class="form-group">
+                                <label class="control-label"><?= __("Category") ?></label>
+                                <div class="form-control-static post-category-display"><?= $postCategory ? $postCategory->name : __("Uncategorized") ?></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"><?= __("Tags") ?></label>
+                                <div class="form-control-static post-tag-display tags-list">
+                                    <?= $post->presenter()->tagsCsv() ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <div class="form-group">
+                            <label class="control-label"><?= __("Post on") ?></label>
+                            <div class="form-control-static"><?= $this->currentUser()->dateTime($post->time, "d/m/Y h:i a") ?></div>
+                        </div>
+                        <?php if ($isModification): ?>
+                            <div class="form-group">
+                                <label class="control-label"><?= __("Edited by") ?></label>
+                                <div class="form-control-static"><?= $this->currentUser()->presenter()->me() ?></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label"><?= __("Edited on") ?></label>
+                                <div class="form-control-static"><?= $this->currentUser()->dateTime(date("Y-m-d H:i:s"), "d/m/Y h:i a") ?></div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hidden-sm hidden-xs">
+            <hr />
+        </div>
+        <div class="row hidden-xs">
+            <div id="cancel-div" class="col-sm-3 text-left">
+                <button role="button" type="button" name="cancel" class="btn btn-danger" onclick="cancelPost()"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></button>
+                <?php if ($post->isSaved()): ?>
+                    <a role="button" href="<?= base_url("posts/post/{$post->id}") ?>" class="btn btn-default"><i class="glyphicon glyphicon-chevron-left"></i> <?= __("View") ?></a>
+                <?php endif; ?>
+            </div>
+            <div class="col-sm-9 text-right">
+                <button role="button" type="button" name="preview" class="btn btn-default edit-mode" onclick="previewPost();"><i class="glyphicon glyphicon-arrow-right"></i> <?= __("Preview") ?></button>
+                <button role="button" type="button" name="preview" class="btn btn-default preview-mode start-hidden" onclick="editPost();"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit") ?></button>
+                <button role="button" type="submit" name="action" value="draft" class="btn btn-default"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Draft") ?></button>
+                <button role="button" type="submit" name="action" value="active" class="btn btn-primary"><i class="glyphicon glyphicon-ok-sign"></i> <?= __("Post") ?></button>
+            </div>
+        </div>
+        <div class="visible-xs">
+            <div class="btn-group btn-group-vertical" style="width:100%">
+                <button role="button" type="submit" name="action" value="active" class="btn btn-primary"><i class="glyphicon glyphicon-ok-sign"></i> <?= __("Post") ?></button>
+                <button role="button" type="button" name="preview" class="btn btn-default edit-mode" onclick="previewPost();"><i class="glyphicon glyphicon-arrow-right"></i> <?= __("Preview") ?></button>
+                <button role="button" type="button" name="preview" class="btn btn-default preview-mode start-hidden" onclick="editPost();"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit") ?></button>
+                <button role="button" type="submit" name="action" value="draft" class="btn btn-default"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Draft") ?></button>
+                <?php if ($post->isSaved()): ?>
+                    <a role="button" href="<?= base_url("posts/post/{$post->id}") ?>" class="btn btn-default"><i class="glyphicon glyphicon-chevron-left"></i> <?= __("View") ?></a>
+                <?php endif; ?>
+                <button role="button" type="button" name="cancel" class="btn btn-danger" onclick="cancelPost()"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></button>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    function updateForm() {
+        $("form#post-form .alert.alert-danger").remove();
+        content = $("#post-content-editor").code();
+        title = $("#post-title").val();
+        if (!title || !content) {
+            $("#post-form #form-main-col").showlert("<?= __("Please add a title and a content to be able to preview or post the discussion.") ?>", {type: "danger", title: "<?= __("Error!") ?> ", dismissAfter: 10000});
+            $(document).scrollTop(0);
+            return false;
+        }
+        $(".post-content").value(content);
+        $("#post-content").val(content);
+        $(".post-title").value(title);
+        return true;
+    }
+
+    function previewPost() {
+        if (!updateForm())
+            return false;
+        $(".edit-mode").hide();
+        $(".preview-mode").show();
+    }
+
+    function editPost() {
+        $(".edit-mode").show();
+        $(".preview-mode").hide();
+    }
+
+    function cancelPost() {
+        $.showdal({body: "<?= __("Are you sure you want to cancel this post?") ?>", title: "<?= __("Cancel Confirmation") ?>", buttons: {
+                "Yes": {
+                    action: function() {
+                        doCancelPost();
+                        $(this).showdal("close");
+                    },
+                    class: "btn-primary"
+                },
+                "No": {
+                    attributes: {
+                        "data-dismiss": "modal",
+                    },
+                    class: "btn-default"
+                }
+            }
+        });
+    }
+
+    function doCancelPost() {
+        fw.ui.loading.show();
+        window.location = "<?= base_url("posts"); ?>";
+    }
+
+    function submitPost() {
+        if (!updateForm())
+            return false;
+        return true;
+    }
+
+    jQuery(function() {
+        $("#post-content-editor").summernote({
+            toolbar: [
+                ['style', ['style']], // no style button
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['help', ['fullscreen']],
+//                ['height', ['height']],
+//                ['insert', ['picture', 'link']], // no insert buttons
+//                ['table', ['table']], // no table button
+//                ['help', ['help']] //no help button
+            ]
+        });
+
+        $("#post-form").submit(function() {
+            if (!updateForm())
+                return false;
+//            $("#post-content-editor").destroy();
+//            $("#post-content-editor").hide();
+//            $("#post-content").removeClass("visible-but-hide").addClass("form-control required");
+            return true;
+        });
+
+        $("#post-category").selectize({
+            render: {
+                item: function(item, escape) {
+                    return "<div>" + trim(escape(item.text)) + "</div>";
+                }
+            },
+            onChange: function(value) {
+                displayValue = trim(this.getOption(value).text());
+                if (!displayValue)
+                    displayValue = "<?= __("Uncategorized") ?>";
+                $(".post-category-display").value(displayValue);
+            },
+        });
+        $("#post-tag").selectize({
+            persist: false,
+            maxOptions: 5,
+            valueField: 'tag',
+            labelField: 'tag',
+            searchField: ['tag'],
+//            options: [
+//                {tag: 'aaa'}, {tag: 'bbb'}, {tag: 'ccc'}
+//            ],
+            render: {
+                item: function(item, escape) {
+                    return "<div>" + escape(item.tag) + "</div>";
+                },
+                option: function(item, escape) {
+                    return "<div>" + escape(item.tag) + "</div>";
+                }
+            },
+            create: function(input) {
+                return {tag: input};
+            },
+            load: function(query, callback) {
+                if (!query.length)
+                    return callback();
+                $.ajax({
+                    url: '<?= base_url('tags/search/') ?>' + encodeURIComponent(query),
+                    type: 'GET',
+                    error: function() {
+                        callback();
+                    },
+                    success: function(res) {
+                        callback(res);
+                    }
+                });
+            },
+            onChange: function(value) {
+                displayValue = trim(value);
+                displayTags(displayValue);
+            },
+        });
+
+        $(".preview-mode").hide();
+
+    });
+
+    function displayTags(tags) {
+        display = $(".post-tag-display");
+        display.value(tags);
+//        display.val(tags);
+    }
+
+</script>

@@ -1,0 +1,37 @@
+<?php /* @var $this MY_Loader */ ?>
+<style>
+</style>
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small><?= $sub_title ?></small>
+        </h1>
+    </div>    
+    
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <h3><?= __("English") ?></h3>
+            <ul class="nav nav-pills nav-stacked">
+                <li><a href="<?= base_url("pages/edit/contact_us/en") ?>"><?= __("Contact Us") ?></a></li>
+                <li><a href="<?= base_url("pages/edit/home/en") ?>"><?= __("Home Page") ?></a></li>
+                <li><a href="<?= base_url("pages/edit/about/en") ?>"><?= __("About Us") ?></a></li>
+            </ul>
+        </div>
+        <div class="col-sm-6">
+            <h3><?= __("Arabic") ?></h3>
+            <ul class="nav nav-pills nav-stacked">
+                <li><a href="<?= base_url("pages/edit/contact_us/ar") ?>"><?= __("Contact Us") ?></a></li>
+                <li><a href="<?= base_url("pages/edit/home/ar") ?>"><?= __("Home Page") ?></a></li>
+                <li><a href="<?= base_url("pages/edit/about/ar") ?>"><?= __("About Us") ?></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+</script>

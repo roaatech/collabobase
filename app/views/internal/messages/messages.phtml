@@ -1,0 +1,7 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $messages ChatMessagePresenterSet */ ?>
+<?php /* @var $chat ChatPresenter */ ?>
+<?php foreach ($messages as $message): ?>
+    <?php /* @var $message ChatMessagePresenter */ ?>
+    <?= $this->extend("internal/messages/message.phtml", ["writer" => $message->writer(), "script" => $message->script(), "time" => $message->time($this->currentUser()->timezone()), "shortened_time" => $message->time($this->currentUser()->timezone(), "d/m/Y h:i a")]) ?>
+<?php endforeach; ?>

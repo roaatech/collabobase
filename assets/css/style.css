@@ -1,0 +1,94 @@
+#login-region{
+    padding:0px;
+}
+
+#login-region form{
+    border-radius:10px;
+    -moz-border-radius:10px;
+    background-color:#f0f0f0;
+    padding:15px;
+}
+
+#login-region #bottom-links{
+    padding:15px;
+}
+
+#right-region{
+
+}
+
+#main-navigation li{
+}
+
+#main-navigation li a{
+}
+
+#main-navigation li a span.hidden-lg{
+}
+
+.nav{
+
+}
+
+.nav.nav-footer{
+    padding:0px;
+    margin:0px;
+    padding-bottom:10px;
+}
+
+.nav.nav-footer > li{
+    padding:0px;
+    margin:0px;
+    display:inline-block;
+    margin-right:5px;
+    padding-right:10px;
+    border-right: 1px solid #f0f0f0;
+}
+
+.nav.nav-footer > li:last-child{
+    margin-right:0px;
+    padding-right:0px;
+    border-right: none;
+}
+
+.nav.nav-footer > li:nth-child(1){
+    padding-left:0px;
+    margin-left:0px;
+}
+
+.nav.nav-footer > li:nth-child(1) > a{
+    padding-left:0px;
+}
+
+.nav.nav-footer > li a{
+    padding:0px 5px;
+    text-align: center;
+}
+
+.nav.nav-footer > li a:hover{
+    background-color: white;
+    text-decoration: underline;
+}
+
+@media screen and (min-width: 768px){
+    .side-region{
+        background-color:#f0f0f0;
+        border-radius:10px;
+        box-sizing: border-box;
+        padding:15px;
+        margin-bottom: 20px;
+    }
+
+    .side-region.white{
+        background-color:white;
+        border:1px solid #DDD;
+    }
+}
+
+table.table-kvp tr th{
+    width:40%;
+}
+
+.error{
+    color:maroon;
+}

@@ -1,0 +1,374 @@
+<script type="text/javascript" src="<?= base_url("assets/js/jquery-ui-1.10.4.interactions.js") ?>"></script>
+<?php
+/* @var $this MY_Loader */
+
+function echoCategories($categories, $key = "root") {
+
+    if (array_key_exists($key, $categories) && count($categories[$key]) > 0) {
+        ?>
+        <div class="panel-group" id="panel-<?= $key ?>-accordion">
+            <?php
+            foreach ($categories[$key] as $index => $category) {
+                /* @var $category NotORM_Row */
+                $row_id = $index + 1;
+                $collapsable = array_key_exists($category['id'], $categories);
+                $subs = $collapsable ? count($categories[$category['id']]) : 0;
+                ?>
+                <div class="panel droppable draggable" data-category-id="<?= $category['id'] ?>" data-category-name="<?= $category['name'] ?>" data-category-parent="<?= $category['parent'] ?>">
+                    <div class="panel-heading">
+                        <span class="pull-right state-value hidden-sm hidden-xs" data-toggle="tooltip" title="<?= __("Number of sub categories") ?>"><?= $subs ?></span>
+                        <span class="pull-right state-value hidden-sm hidden-xs" data-toggle="tooltip" title="<?= __("Number of posts") ?>"><?= $category['posts'] ?></span>
+                        <!--<span class="pull-right state-value hidden-sm hidden-xs" data-toggle="tooltip" title="Number of files"><?= $category['files'] ?></span>-->
+                        <span class="pull-right state-value hidden-sm hidden-xs">
+                            <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Add sub category") ?>)" onclick="editCategory(<?= $category['id'] ?>);"><i class="glyphicon glyphicon-plus"></i></a>
+                            <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Edit the category") ?>" onclick="editCategory('<?= $category['parent'] ?>', '<?= $category['id'] ?>', '<?= $category['name'] ?>');"><i class="glyphicon glyphicon-edit"></i></a>
+                            <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Delete the category") ?>" onclick="deleteCategory('<?= $category['id'] ?>', '<?= $category['name'] ?>');"><i class="glyphicon glyphicon-remove"></i></a>
+                            <a class="category-control"><i class="glyphicon"></i></a>
+                        </span>
+                        <span class="row-num pull-left text-muted"><?= $row_id ?></span>
+                        <?php if ($collapsable): ?>
+                            <a data-toggle="collapse" data-parent="#panel-<?= $key ?>-accordion" href="#panel-<?= $category['id'] ?>-content" class="category-collapse-handler pull-left" onclick="toggleCollapseHandler(this);">
+                                <i class="glyphicon glyphicon-collapse-down"></i>
+                            </a>
+                        <?php else: ?>
+                            <a class="category-collapse-handler pull-left">
+                                <i class="glyphicon"></i>
+                            </a>
+                        <?php endif; ?>
+                        <h4 class="panel-title"><?= $category['name'] ?></h4>
+                        <div class="visible-sm visible-xs" style="clear: both;">
+            <!--                            <span class="text-muted">
+                                <? = __("Files ") ?><? = $category['files'] ?>
+                            </span>,-->
+                            <span class="text-muted">
+                                <?= __("Posts ") ?><?= $category['posts'] ?>
+                            </span>,
+                            <span class="text-muted">
+                                <?= __("Sub categories ") ?><?= $subs ?>
+                            </span>
+                        </div>
+                        <div class="visible-sm visible-xs">
+                            <a href="#" data-toggle="tooltip" title="<?= __("Add sub category") ?>" onclick="editCategory(<?= $category['id'] ?>);"><?= __("Create sub-category") ?></a> - 
+                            <a href="#" data-toggle="tooltip" title="<?= __("Edit the category") ?>" onclick="editCategory('<?= $category['parent'] ?>', '<?= $category['id'] ?>', '<?= $category['name'] ?>');"><?= __("Edit") ?></a> - 
+                            <a href="#" data-toggle="tooltip" title="<?= __("Delete the category") ?>" onclick="deleteCategory('<?= $category['id'] ?>', '<?= $category['name'] ?>');"><?= __("Delete") ?></a>
+                        </div>
+                    </div>
+                    <div style="padding-<?= __("_main_side") ?>:45px;" id="panel-<?= $category['id'] ?>-content" class="panel-collapse collapse">
+                        <?= echoCategories($categories, $category['id']); ?>
+                    </div>
+                </div>
+                <?php
+            }
+            ?>
+            <div id="uncategorize" class="panel droppable start-hidden" data-category-id="1" data-category-name="uncategorized" data-category-parent="">
+                <div class="panel-heading">
+                    <h4 class="panel-title"><?= __("Uncategoized") ?></h4>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+}
+
+function echoList($categories, $key = "root") {
+
+    static $level = 1;
+
+    $prepend = str_repeat("&nbsp;", $level * 3);
+    if (array_key_exists($key, $categories) && count($categories[$key]) > 0) {
+        foreach ($categories[$key] as $index => $category) {
+            ?>
+            <option value="<?= $category['id'] ?>"><?= $prepend . $category['name'] ?></option>
+            <?php
+            $level++;
+            echoList($categories, $category['id']);
+            $level--;
+        }
+    }
+}
+?>
+<style>
+    #panel-root-accordion .panel{
+        margin-bottom: 0px;
+        margin-top: 0px;
+    }
+    #panel-root-accordion .panel-heading{
+        border-bottom:1px solid #ebebeb;
+    }
+    #panel-root-accordion .panel-heading .row-num{
+        width:15px;
+    }
+    #panel-root-accordion .panel-heading a.category-control{
+        margin:0px 5px;
+    }
+    #panel-root-accordion .panel-heading a.category-collapse-handler{
+        margin:0px 5px;
+        margin-<?= __("_sub_side") ?>: 10px;
+    }
+    #panel-root-accordion .panel-heading:hover{
+        background-color:#f8f8f8;
+    }
+    .panel .state-value{
+        font-size:14px;
+        color:#797979;
+        min-width:35px;
+        text-align:center;
+    }
+
+    .panel.draggable > .panel-heading h4{
+        cursor: move;
+    }
+    .panel#uncategorize,.panel#uncategorize *{
+        text-align:center;
+        font-size: 20px;
+        /*background-color:#f8f8f8;*/
+        color:#ACACAC;
+    }
+    .panel.droppable.possible{
+        border:1px solid #cccccc;
+        /*background-color:#f9f9f9;*/
+    }
+    .panel.droppable.over{
+        border:1px solid #ccffcc;
+        background-color:#eeffee;
+    }
+</style>
+<div class="container">
+
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small>
+                <?= __($sub_title) ?>
+            </small>
+        </h1>
+    </div>
+
+
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+
+    <div class="row">
+
+        <div class="col-sm-4 col-sm-push-8 col-md-3 col-md-push-9 col-lg-2 col-lg-push-10">
+            <ul class="nav nav-stacked side-region white" style="padding:5px;">
+                <li><a href="#" onclick="showAll()"><i class="pull-right glyphicon glyphicon-collapse-down"></i> <?= __("Show all") ?></a></li>
+                <li><a href="#" onclick="hideAll()"><i class="pull-right glyphicon glyphicon-collapse-up"></i> <?= __("Hide all") ?></a></li>
+                <li><a href="#" onclick="editCategory()"><i class="pull-right glyphicon glyphicon-plus"></i> <?= __("New category") ?></a></li>
+            </ul>
+        </div>
+
+
+        <div class="col-sm-8 col-sm-pull-4 col-md-9 col-md-pull-3 col-lg-10 col-lg-pull-2">
+
+            <div class="panel-group">
+                <div id="categories-container" class="panel" style="border:none;box-shadow: none;outline:none;-webkit-box-shadow: none; margin-bottom:5px;">
+                    <div class="panel-heading hidden-sm hidden-xs" style="font-weight: bold;border-bottom:1px solid #ACACAC;">
+                        <div class="panel-title">
+                            <span class="pull-right state-value" data-toggle="tooltip" title="<?= __("Number of sub categories") ?>"><?= __("S") ?></span>
+                            <span class="pull-right state-value" data-toggle="tooltip" title="<?= __("Number of posts") ?>"><?= __("P") ?></span>
+                            <!--<span class="pull-right state-value" data-toggle="tooltip" title="Number of files">F</span>-->
+                            <span class="pull-right state-value">
+                                <a class="category-control"><i class="glyphicon"></i></a>
+                                <a class="category-control"><i class="glyphicon"></i></a>
+                                <a class="category-control"><i class="glyphicon"></i></a>
+                                <a class="category-control"><i class="glyphicon"></i></a>
+                            </span>
+                            <div class="clearfix"><?= __("Categories") ?></div>
+                        </div>
+                    </div>
+                    <div class="panel-body" style="padding:0px;">
+                        <?php echoCategories($categories); ?>
+                    </div>
+                    <small class="text-muted" style="line-height: 40px;">
+                        <?= __("Total of") ?> <?= $total ?> <?= __("categories and sub-categories exist!") ?>
+                    </small>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="hide" id="new-category-form">
+    <form class="new-category-form form" action="<?= base_url("categories/submit") ?>" method="post" onsubmit="">
+        <input type="hidden" name="categoryId" value="" class="form-category-id" />
+        <div class="form-group">
+            <label class="control-label"><?= __("Category name") ?></label>
+            <input type="text" class="form-control form-category-name" name="name" placeholder="<?= __("Category name") ?>" />
+        </div>
+        <div class="form-group">
+            <label class="control-label"><?= __("Parent category") ?></label>
+            <select class="form-control form-category-parent" name="parent">
+                <option value=""><?= __("No parent") ?></option>
+                <?= echoList($categories) ?>
+            </select>
+        </div>
+    </form>
+</div>
+<form id="delete-category-form" class="form" action="<?= base_url("categories/delete") ?>" method="post">
+    <input type="hidden" name="categoryId" value="" class="delete-category-id" />
+</form>
+<script type="text/javascript">
+    function toggleCollapseHandler(handler) {
+        $(handler).find(".glyphicon").toggleClass("glyphicon-collapse-up glyphicon-collapse-down");
+    }
+
+    function hideAll() {
+        $("#panel-root-accordion .panel-collapse").collapse("hide");
+        $("#panel-root-accordion .panel-heading a[data-toggle=collapse] i").removeClass("glyphicon-collapse-up").addClass("glyphicon-collapse-down");
+    }
+
+    function showAll() {
+        $("#panel-root-accordion .panel-collapse").collapse("show");
+        $("#panel-root-accordion .panel-heading a[data-toggle=collapse] i").addClass("glyphicon-collapse-up").removeClass("glyphicon-collapse-down");
+    }
+
+    function editCategory(parent, id, name) {
+        form = $("#new-category-form > form").clone();
+        if (parent === undefined)
+            parent = "";
+        if (name === undefined)
+            name = "";
+        if (id === undefined)
+            id = "";
+        form.find('.form-category-parent option[value="' + parent + '"]').attr("selected", "selected");
+        form.find('.form-category-id').val(id);
+        form.find('.form-category-name').val(name);
+        form.showdal({
+            "title": "<?= __("Create new category") ?>",
+            "buttons": {
+                "Cancel": {
+                    "class": "btn btn-default pull-left",
+                    "attributes": {
+                        "data-dismiss": "modal"
+                    },
+                    title: "<?= __("Cancel") ?>"
+                },
+                "Create": {
+                    "class": "btn btn-primary",
+                    "action": function() {
+                        modal = $(this).closest(".modal").get(0);
+                        categoryId = $(modal).find(".form-category-id").val();
+                        categoryName = $(modal).find(".form-category-name").val();
+                        categoryParent = $(modal).find(".form-category-parent").val();
+                        if (!categoryName) {
+                            return $(modal).find(".modal-body").showlert("The name is required", {"dismissAfter": 5000, "type": "danger"});
+                        }
+                        $(this).showdal("hide");
+                        return submitCategory(categoryId, categoryName, categoryParent);
+                    },
+                    title: "<?= __("Create") ?>"
+                }
+            }
+        });
+    }
+
+    function submitCategory(categoryId, categoryName, categoryParent) {
+        if (!categoryName)
+            return false;
+        $(".form-category-id").val(categoryId);
+        $(".form-category-name").val(categoryName);
+        $(".form-category-parent option[value=" + categoryParent + "]").attr("selected", "selected");
+        $(this).showdal("hide");
+        $("#new-category-form > form").submit();
+    }
+
+    function deleteCategory(id, name) {
+        $("#delete-category-form .delete-category-id").val(id);
+        $.showdal({
+            "body": "You are going to to completely remove the category '" + name + "'?<br /><br /><div class='text-danger'><strong>Warning!</strong> Deleting the category will make all its sub-categories, posts, and files follow its parent category, or uncategorized if it is not under a parent category!</div><br />Are you sure you want to continue?",
+            "title": "Delete category",
+            "buttons": {
+                "Cancel": {
+                    "class": "btn btn-default pull-left",
+                    "attributes": {
+                        "data-dismiss": "modal"
+                    },
+                },
+                "Delete": {
+                    "class": "btn btn-primary",
+                    "action": function() {
+                        $("#delete-category-form").submit();
+                        $(this).showdal("hide");
+                    },
+                }
+            }
+        });
+    }
+
+    function moveCategory(categoryId, categoryName, parentId, parentName) {
+        if (!categoryId || !categoryName || !parentId)
+            return false;
+        fw.temporary.moveId = categoryId;
+        fw.temporary.moveName = categoryName;
+        fw.temporary.moveParent = parentId == 1 ? null : parentId;
+        message = "You are going to to move the category '" + categoryName + "' and all its contents into category '" + parentName + "'!<br /><br />Are you sure you want to continue?";
+        if (parentId == '1')
+            message = "You are going to to convert the category '" + categoryName + "' to a root category!<br /><br />Are you sure you want to continue?";
+        $.showdal({
+            "body": message,
+            "title": "Move category",
+            "buttons": {
+                "Cancel": {
+                    "class": "btn btn-default pull-left",
+                    "attributes": {
+                        "data-dismiss": "modal"
+                    },
+                },
+                "Move": {
+                    "class": "btn btn-primary",
+                    "action": function() {
+                        submitCategory(fw.temporary.moveId, fw.temporary.moveName, fw.temporary.moveParent);
+                        $(this).showdal("hide");
+                    },
+                }
+            }
+        });
+    }
+
+
+    /******* DnD ************/
+
+
+    /**** jq ready *****/
+    $(function() {
+        $('[data-toggle=tooltip]').tooltip({container: "body"});
+
+        $(".panel.draggable").draggable({
+            axis: "y",
+            containment: "#categories-container",
+            cursor: "move",
+//            cursorAt: {bottom: -10},
+            distance: 30,
+            handle: "h4",
+            opacity: 0.75,
+            revert: true, //"invalid",
+            scope: "panels",
+            zIndex: 100,
+            start: function(e, ui) {
+                $("#categories-container #uncategorize").show();
+            },
+            stop: function(e, ui) {
+                $("#categories-container #uncategorize").hide();
+            },
+        });
+
+        $(".panel.droppable").droppable({
+            accept: ".panel.draggable",
+            activeClass: "possible",
+            hoverClass: "over",
+            scope: "panels",
+//            tolerance: "pointer",
+            greedy: false,
+            drop: function(event, ui) {
+                if (ui.draggable[0] == this || $(ui.draggable[0]).data('category-parent') == $(this).data('category-id'))
+                    return false;
+                moveCategory($(ui.draggable[0]).data('category-id'), $(ui.draggable[0]).data('category-name'), $(this).data('category-id'), $(this).data('category-name'));
+            },
+        });
+    });
+</script>

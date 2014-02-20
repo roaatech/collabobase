@@ -1,0 +1,507 @@
+<?php
+/* @var $filep UserFilePresenter */
+?>
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small>
+                <?php if ($is_me): ?>
+                    <?= __($sub_title) ?>
+                <?php else: ?>
+                    <a href="<?= base_url("users") ?>"><?= __($sub_title) ?></a> <span class="text-muted"> &gt; </span> <?= $model->col('full_name', $model->col('username')) ?>
+                <?php endif; ?>
+            </small>
+        </h1>
+    </div>
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+    <div class="">
+        <div class="pull-right hidden-xs">
+            <?php if ($model->isAdmin() || $model->isUser()): ?>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <?= __("Actions") ?> <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu pull-right" role="menu">
+                        <li><a href="<?= base_url($edit_url) ?>"><?= __("Edit") ?></a></li>
+                        <li><a href="<?= base_url($change_password_url) ?>"><?= __("Change Password") ?></a></li>
+                        <?php if (!$is_me): ?>
+                            <?php if ($model->col('user_information:status') == 'active'): ?>
+                                <li><a href="#" onclick="suspendDialog();"><?= __("Suspend") ?></a></li>
+                            <?php else: ?>
+                                <li><a href="#" onclick="activateDialog();"><?= __("Activate") ?></a></li>
+                            <?php endif; ?>
+                            <li><a href="#" onclick="deleteUserDialog();"><?= __("Delete") ?></a></li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+        </div>
+        <div class="visible-xs">
+            <div class="btn-group width-100">
+                <button style="width:25%;" type="button" class="btn btn-default" onclick="window.location = '<?= base_url($edit_url) ?>';"><?= __("Edit") ?></button>
+                <button style="width:50%;" type="button" class="btn btn-default" onclick="window.location = '<?= base_url($change_password_url) ?>';"><?= __("Change Password") ?></button>
+                <?php if (!$is_me): ?>
+                    <?php if ($model->col('user_information:status') == 'active'): ?>
+                        <button style="width:25%;" type="button" class="btn btn-default" onclick="suspendDialog();"><?= __("Suspend") ?></button>
+                    <?php else: ?>
+                        <button style="width:25%;" type="button" class="btn btn-default" onclick="activateDialog();"><?= __("Activate") ?></button>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+            &nbsp;
+        </div>
+    </div>
+    <div class="">
+        <div>
+            <ul id="profile-tabs-nav" class="nav nav-tabs hidden-xs">
+                <li class="active"><a href="#account" data-toggle="tab"><?= __("Account") ?></a></li>
+                <li><a href="#personal" data-toggle="tab"><?= __("Personal") ?></a></li>
+                <li><a href="#contact" data-toggle="tab"><?= __("Contact") ?></a></li>
+                <li><a href="#mission" data-toggle="tab"><?= __("Mission") ?></a></li>
+                <li><a href="#address" data-toggle="tab"><?= __("Address") ?></a></li>
+                <li><a href="#emergency" data-toggle="tab"><?= __("Emergency") ?></a></li>
+                <li><a href="#files" data-toggle="tab"><?= __("Files") ?></a></li>
+            </ul>
+            <div class="hidden-lg hidden-md hidden-sm">
+                <div class="input-group">
+                    <span class="input-group-addon"><?= __("View") ?>: </span>
+                    <select class='form-control' id="profile-tabs-lst" onchange='$("#profile-tabs-nav a[href=\"#" + this.value + "\"]").tab("show")'>
+                        <option value="account"><?= __("Account") ?></option>
+                        <option value="personal"><?= __("Personal") ?></option>
+                        <option value="contact"><?= __("Contact") ?></option>
+                        <option value="mission"><?= __("Mission") ?></option>
+                        <option value="address"><?= __("Address") ?></option>
+                        <option value="emergency"><?= __("Emergency") ?></option>
+                        <option value="files"><?= __("Files") ?></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        &nbsp;
+        <div>
+            <div id='profile_tabs' class='tab-content'>
+                <div class="tab-pane active" id="account">
+                    <table class="table table-hover table-striped table-kvp">
+                        <tr>
+                            <th><?= __("Username") ?></th>
+                            <td><?= $model->col('username') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Roles") ?></th>
+                            <td><?= $model->presenter()->roleList() ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Creation date") ?></th>
+                            <td><?= $this->currentUser()->dateTime($model->raw()->user_information['creation_date']) ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Status") ?></th>
+                            <td class="<?= pass($model->raw()->user_information['status'], 'strtolower') ?>-status"><?= __(pass($model->raw()->user_information['status'], 'strtolower,ucfirst')) ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane" id="contact">
+                    <table class="table table-hover table-striped table-kvp">
+                        <tr>
+                            <th><?= __("Main phone") ?></th>
+                            <td><?= $model->col('main_phone', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Alternative phone") ?></th>
+                            <td><?= $model->col('alternative_phone', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Email") ?></th>
+                            <td><?= $model->col('email', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Skype") ?></th>
+                            <td><?= $model->col('skype_id', '<small>NA</small>') ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane" id="personal">
+                    <table class="table table-hover table-striped table-kvp">
+                        <tr>
+                            <th><?= __("First name") ?></th>
+                            <td><?= $model->col('first_name', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Second name") ?></th>
+                            <td><?= $model->col('second_name', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Last name") ?></th>
+                            <td><?= $model->col('last_name', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Birth date") ?></th>
+                            <td><?= dt($model->col('birth_date'), 'd M Y', '<small>NA</small>') ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane" id="mission">
+                    <table class="table table-hover table-striped table-kvp">
+                        <tr>
+                            <th><?= __("Title") ?></th>
+                            <td><?= $model->col('user_mission:title', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Department") ?></th>
+                            <td><?= $model->col('user_mission:department', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Supervisor") ?></th>
+                            <td><?= $model->col('user_mission:supervisor', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Employee ID") ?></th>
+                            <td><?= $model->col('user_mission:employee_id', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Work location") ?></th>
+                            <td><?= $model->col('user_mission:work_location', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Start date") ?></th>
+                            <td><?= $this->currentUser()->dateTime($model->col('user_mission:start_date', null), 'd M Y', '<small>NA</small>') ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane" id="address">
+                    <table class="table table-hover table-striped table-kvp">
+                        <tr>
+                            <th><?= __("Street") ?></th>
+                            <td><?= $model->col('user_address:street', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("City") ?></th>
+                            <td><?= $model->col('user_address:city', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("State / province") ?></th>
+                            <td><?= $model->col('user_address:state', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("ZIP") ?></th>
+                            <td><?= $model->col('user_address:zip', '<small>NA</small>') ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane" id="emergency">
+                    <table class="table table-hover table-striped table-kvp">
+                        <tr>
+                            <th><?= __("Contact name") ?></th>
+                            <td><?= $model->col('user_emergency_contact:full_name', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Primary phone") ?></th>
+                            <td><?= $model->col('user_emergency_contact:primary_phone', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Alternative phone") ?></th>
+                            <td><?= $model->col('user_emergency_contact:alternative_phone', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Email") ?></th>
+                            <td><?= $model->col('user_emergency_contact:email', '<small>NA</small>') ?></td>
+                        </tr>
+                        <tr>
+                            <th><?= __("Skype ID") ?></th>
+                            <td><?= $model->col('user_emergency_contact:skype_id', '<small>NA</small>') ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="tab-pane" id="files">
+                    <div class="visible-xs visible-sm">
+                        <div class="btn-group width-100">
+                            <button class="btn btn-default" onclick="showNewFileUploadDialog();"><?= __("Upload New File") ?></button>
+                        </div>
+                        &nbsp;
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <?php if ($model->raw()->user_file()->count() > 0): ?>
+                                <table class="table table-striped table-responsive table-hover">
+                                    <thead>
+                                    </thead>
+                                    <tbody>
+                                        <?php $i = 1; ?>
+                                        <?php foreach ($model->raw()->user_file() as $file): ?>
+                                            <?php $filem = $file->model(); ?>
+                                            <?php $filep = $filem->presenter(); ?>
+                                            <tr>
+                                                <th style="width:4%" ><?= $i++ ?></th>
+                                                <td style="width:5%;" >
+                                                    <a  target="_blank" href="<?= $filep->getUrl() ?>">
+                                                        <img src="<?= base_url("assets/images/" . pass(type($filem->col('file_type'), 'file'), 'strtolower')) . ".png" ?>" style="max-width: 48px;" class="img-responsive" />
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <strong><?= $filem->col('title') ?></strong><br />
+                                                    <span><?= $filem->col('description') ?></span><br />
+                                                    <small class="text-muted"><?= pass(type($filem->col('file_type'), 'file'), 'strtolower,ucwords') ?> <?= __("file, Uploaded in") ?> <?= $this->currentUser()->dateTime($filem->col('time')) ?></small>
+                                                </td>
+                                                <!--<td class="hidden-sm hidden-xm hidden-md"><?= $this->currentUser()->dateTime($filem->col('time')) ?></td>-->
+                                                <td class="text-right" style="width: 5%">
+                                                    <div class="btn-group">
+                                                        <a target="_blank" role="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                                            <span class="caret"></span>
+                                                            <span class="sr-only"><?= __("Toggle Dropdown") ?></span>
+                                                        </a>
+                                                        <ul class="dropdown-menu text-left pull-right" role="menu">
+                                                            <li><a target="_blank" href="<?= $filep->getUrl() ?>"><?= __("View") ?></a></li>
+                                                            <li><a href="#" onclick="confirmFileDeleteDialog(<?= $filem->col("id") ?>, '<?= $filem->col("title") ?>');"><?= __("Delete") ?></a></li>
+                                                            <li><a href="#" onclick="editFileDialog(<?= $filem->col("id") ?>, '<?= $filem->col("title") ?>', '<?= pass($filem->col("description"), "addslashes") ?>', '<?= pass($filem->col("local_name"), "htmlentities") ?>');"><?= __("Edit") ?></a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4"><span class="text-muted"><?= $i - 1 ?> <?= __("files uploaded") ?>.</span></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            <?php else: ?>
+                                <div class="text-muted"><?= __("There are no files for this user right now.") ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-4 hidden-sm hidden-xs">
+                            <form class="form side-region white" role="form" action="<?= base_url("users/upload") ?>" method="post" enctype="multipart/form-data">
+                                <h4><?= __("Upload a file") ?></h4>
+                                <input type="hidden" name="return_url" value="<?= $view_url ?>/files" />
+                                <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+                                <div class="form-group">
+                                    <label class="" for="fileFle"><?= __("File") ?></label>
+                                    <input type="file" class="form-control required" required="required" id="fileFle" name="file" placeholder="Choose a file" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="" for="titleTxt"><?= __("Title") ?></label>
+                                    <input type="text" class="form-control required" required="required" id="titleTxt" name="title" placeholder="Name the file" value="<?= $this->session->flashdata('file_upload_title') ?>" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="" for="descriptionTxt"><?= __("Description") ?></label>
+                                    <textarea name="description" id="descriptionTxt" class="form-control" placeholder="Description"><?= $this->session->flashdata('file_upload_description') ?></textarea>
+                                </div>
+                                <div class="text-right">
+                                    <button role="button" type="submit" name="upload" class="btn btn-primary"><?= __("Upload") ?></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div id="file-upload-form-container" class="hide">
+                            <form class="form white" role="form" action="<?= base_url("users/upload") ?>" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="return_url" value="<?= $view_url ?>/files" />
+                                <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+                                <div class="form-group">
+                                    <label class="" for="fileFle"><?= __("File") ?></label>
+                                    <input type="file" class="form-control required" required="required" id="fileFle" name="file" placeholder="Choose a file" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="" for="titleTxt"><?= __("Title") ?></label>
+                                    <input type="text" class="form-control required" required="required" id="titleTxt" name="title" placeholder="Name the file" value="<?= $this->session->flashdata('file_upload_title') ?>" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="" for="descriptionTxt"><?= __("Description") ?></label>
+                                    <textarea name="description" id="descriptionTxt" class="form-control" placeholder="Description"><?= $this->session->flashdata('file_upload_description') ?></textarea>
+                                </div>
+                                <div class="text-right">
+                                    <button role="button" type="submit" name="upload" class="btn btn-primary"><?= __("Upload") ?></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div id="file-edit-form-container" class="modal fade">
+                            <form class="modal-dialog form white" role="form" action="<?= base_url("users/do_edit_file") ?>" method="post">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                        <h4 class="modal-title"><?= __("Edit a file") ?></h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="return_url" value="<?= $view_url ?>/files" />
+                                        <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+                                        <input type="hidden" class="file_id" name="file_id" value="" />
+                                        <div class="form-group">
+                                            <label class="" for="fileFle"><?= __("File") ?></label>
+                                            <input type="text" readonly="readonly" disabled="disabled" class="form-control required local_name" required="required" name="local_name" value="" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="" for="titleTxt"><?= __("Title") ?></label>
+                                            <input type="text" class="form-control required file_title" required="required" name="title" placeholder="Name the file" value="" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="" for="descriptionTxt"><?= __("Description") ?></label>
+                                            <textarea name="description" class="form-control file_description" placeholder="Description"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button role="button" type="submit" name="upload" class="btn btn-primary"><?= __("Save") ?></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <form id="file-delete-form" method="post" action="<?= base_url("users/do_delete_file") ?>" class="hide">
+                            <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+                            <input type="hidden" name="return_url" value="<?= $view_url ?>/files" />
+                            <input type="hidden" class="file_id" name="file_id" value="" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        $("#profile-tabs-nav a").click(function() {
+            $("#profile-tabs-lst option").removeAttr("selected").filter("[value=" + $(this).attr('href').toString().substring(1) + "]").attr("selected", "selected");
+        });
+    });
+
+    function showNewFileUploadDialog() {
+        $.showdal({body: $("#file-upload-form-container").html(), "title": "<?= __("Upload new file") ?>"});
+    }
+
+    function editFileDialog(id, name, description, localName) {
+        modal = $("#file-edit-form-container");
+        console.log(modal);
+        modal.find(".file_id").val(id);
+        modal.find(".local_name").val(localName);
+        modal.find(".file_title").val(name);
+        modal.find(".file_description").html(description);
+        modal.modal("show");
+    }
+
+    function confirmFileDeleteDialog(id, title) {
+        $("#file-delete-form .file_id").val(id);
+        $.showdal({
+            "title": "<?= __("Delete File Confirmation") ?>",
+            "body": "<?= __("Are you sure you want to delete the file named") ?> '" + title + "'<?= __("?") ?>",
+            "buttons": {
+                "Delete": {
+                    "action": function() {
+                        $(this).showdal('close');
+                        $("#file-delete-form").submit();
+                    },
+                    "title": "<?= __("Delete") ?>",
+                    "class": "btn-primary float-left",
+                    "attributes": {},
+                },
+                "Cancel": {
+                    "attributes": {
+                        "data-dismiss": "modal"
+                    },
+                    "class": "btn-default",
+                    title: "<?= __("Cancel") ?>"
+                },
+            },
+        });
+    }
+
+</script>
+<?php if (!empty($tab)): ?>
+    <script type="text/javascript">
+        $(function() {
+            $("#profile-tabs-nav a[href='#<?= $tab ?>']").tab('show');
+        });
+    </script>
+<?php endif; ?>
+<?php if (!$is_me): ?>
+    <form id="status-user-form" method="post" action="<?= $model->col("user_information:status") == "active" ? base_url("users/do_suspend") : base_url("users/do_activate") ?>" class="hide">
+        <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+    </form>
+    <?php if ($model->col("user_information:status") == "active"): ?>
+        <script type="text/javascript">
+            function suspendDialog() {
+                $.showdal({
+                    "title": "<?= __("Suspend Confirmation") ?>",
+                    "body": "<?= __("Are you sure you want to suspend the user?") ?>",
+                    "buttons": {
+                        "Suspend": {
+                            "action": function() {
+                                $(this).showdal('close');
+                                $("#status-user-form").submit();
+                            },
+                            "title": "<?= __("Yes") ?>",
+                            "class": "btn-primary float-left",
+                            "attributes": {},
+                        },
+                        "Cancel": {
+                            "attributes": {
+                                "data-dismiss": "modal"
+                            },
+                            "class": "btn-default",
+                            title: "<?= __("Cancel") ?>"
+                        },
+                    },
+                });
+            }
+        </script>
+    <?php else: ?>
+        <script type="text/javascript">
+            function activateDialog() {
+                $.showdal({
+                    "title": "<?= __("Activate Confirmation") ?>",
+                    "body": "<?= __("Are you sure you want to activate the user?") ?>",
+                    "buttons": {
+                        "Suspend": {
+                            "action": function() {
+                                $(this).showdal('close');
+                                fw.ui.loading.show();
+                                $("#status-user-form").submit();
+                            },
+                            "title": "<?= __("Yes") ?>",
+                            "class": "btn-primary float-left",
+                            "attributes": {},
+                        },
+                        "Cancel": {
+                            "attributes": {
+                                "data-dismiss": "modal"
+                            },
+                            "class": "btn-default",
+                            title: "<?= __("Cancel") ?>"
+                        },
+                    },
+                });
+            }
+        </script>
+    <?php endif; ?>
+    <form id="delete-user-form" method="post" action="<?= base_url("users/delete") ?>" class="hide">
+        <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+    </form>
+    <script type="text/javascript">
+        function deleteUserDialog() {
+            $.showdal({
+                "title": "<?= __("Delete User Confirmation") ?>",
+                "body": "<?= __("Are you sure you want to delete this user?") ?>",
+                "buttons": {
+                    "Suspend": {
+                        "action": function() {
+                            $(this).showdal('close');
+                            fw.ui.loading.show();
+                            $("#delete-user-form").submit();
+                        },
+                        "title": "<?= __("Delete This User!") ?>",
+                        "class": "btn-danger float-left",
+                        "attributes": {},
+                    },
+                    "Cancel": {
+                        "attributes": {
+                            "data-dismiss": "modal"
+                        },
+                        "class": "btn-default pull-left",
+                        title: "<?= __("Cancel") ?>"
+                    },
+                },
+            });
+        }
+    </script>
+<?php endif; ?>

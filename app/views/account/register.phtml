@@ -1,0 +1,43 @@
+<h3><?= __("Create New User") ?></h3>
+<?php if ($has_errors == true): ?>
+    <div class="has-error" style="margin-bottom:10px;">
+        <?= validation_errors("<div class='control-label'>", "</div>") ?>
+    </div>
+<?php endif; ?>
+<form action='<?= base_url("users/create") ?>' method="post" class="form form-horizontal clearfix">
+    <div class="form-group">
+        <label class="control-label col-xs-4" for="usernameTxt"><?= __("Username") ?></label>
+        <span class="col-xs-8">
+            <input class="form-control required" required="required" id="usernameTxt" name="username" type="text" placeholder="<?= __("Username") ?>" value="<?= set_value('username') ?>" />
+        </span>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4" for="userRoleLst"><?= __("User Role") ?></label>
+        <span class="col-xs-8">
+            <select class="form-control required" required="required" id="userRoleLst" name="role" placeholder="<?= __("User Role") ?>">
+                <option value="user"><?= __("User") ?></option>
+                <option value="supervisor"><?= __("Supervisor") ?></option>
+                <option value="admin"><?= __("Admin") ?></option>
+            </select>
+        </span>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4" for="firstnameTxt"><?= __("First Name") ?></label>
+        <span class="col-xs-8">
+            <input class="form-control required" required="required" id="firstnameTxt" name="firstname" type="text" placeholder="<?= __("First Name") ?>" value="<?= set_value('firstname') ?>" />
+        </span>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4" for="lastnameTxt"><?= __("Last Name") ?></label>
+        <span class="col-xs-8">
+            <input class="form-control required" required="required" id="lastnameTxt" name="lastname" type="text" placeholder="<?= __("Last Name") ?>" value="<?= set_value('lastname') ?>" />
+        </span>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-4" for="noteTxt"><?= __("Note") ?></label>
+        <span class="col-xs-8">
+            <textarea class="form-control resize-vertical" id="noteTxt" name="note" placeholder="<?= __("Note") ?>"><?= set_value('note') ?></textarea>
+        </span>
+    </div>
+    <button type="submit" class="btn btn-primary pull-right"><?= __("Create") ?></button>
+</form>

@@ -1,0 +1,30 @@
+<footer class="container">
+    <hr />
+    <div class="hidden-xs">
+        <div class="pull-right"><?= __("&copy; 2013, T4F.") ?> <?= __("Developed by") ?> <a href="http://www.itvision-sa.com" target="_blank"><?= __("IT Vision") ?></a>.</div>
+    </div>
+    <ul class="nav nav-footer">
+        <li><a href="<?= base_url("home") ?>"><?= __("Home") ?></a></li>
+        <li><a href="<?= base_url("about") ?>"><?= __("About") ?></a></li>
+        <li><a href="<?= base_url("contact_us") ?>"><?= __("Contact Us") ?></a></li>
+        <li><a href="<?= base_url("language/arabic") ?>"><?= __("Arabic") ?></a></li>
+        <li><a href="<?= base_url("language/english") ?>"><?= __("English") ?></a></li>
+    </ul>
+    <div class="visible-xs">
+        <?= __("&copy; 2013, T4F.") ?> <?= __("Developed by") ?> <a href="http://www.itvision-sa.com" target="_blank">IT Vision</a>.
+    </div>
+</footer>
+<div id="loader_modal" class="modal fade" data-keyboard="false" data-backdrop="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img src="<?= base_url("assets/images/loading.gif") ?>" alt="loading" />
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script type="text/javascript">
+    $("body").on("submit", "form", function(e) {
+        fw.ui.loading.show();
+    });
+</script>

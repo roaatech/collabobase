@@ -1,0 +1,90 @@
+<?php /* @var $this MY_Loader */ ?>
+<script type="text/javascript" src="<?= base_url("assets/js/summernote.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/summernote-me.css") ?>" />
+<style>
+    @media screen and (min-width: 768px){
+        #controls div{
+            padding:0px;
+        }
+        #preview-controls{
+            position: fixed;
+            bottom:0px;
+            left: 0px;
+            width: 100%;
+            /*background-color:rgba(0,0,0,0.25);*/
+            padding:10px 0px;
+        }
+
+    }
+</style>
+<div class="start-hidden preview-mode" id="preview-controls">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-sm-push-6 text-<?= __("_sub_side") ?>">
+                <button class="btn btn-success" onclick="fw.logic.editMode();"><i class="glyphicon glyphicon-backward"></i> <?= __("Return to Edit Mode") ?></button>
+                <button class="btn btn-primary" onclick="fw.logic.savePage();"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Save") ?></button>
+            </div>
+            <div class="col-sm-6 col-sm-pull-6 text-<?= __("_main_side") ?>">
+                <a class="btn btn-danger" href="<?= base_url("pages/edit") ?>"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container start-hidden preview-mode" id="preview-mode">
+</div>
+<div class="container" id="edit-mode">
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small><?= $sub_title ?></small>
+        </h1>
+    </div>
+
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+
+    <div>
+        <form id="page-form" class="form" action="<?= base_url("pages/save") ?>" method="post">
+            <input type="hidden" name="page" value="<?= $page ?>" />
+            <input type="hidden" name="edit_language" value="<?= $edit_language ?>" />
+            <div class="control-group">
+                <label class="sr-only control-label" for="content-editor"><?= __("Content") ?></label>
+                <textarea class="form-control" name="content" id="content-editor"><?= $content ?></textarea>
+            </div>
+            <hr />
+            <div class="raw" id="controls">
+                <div class="col-xs-6 text-<?= __("_sub_side") ?> col-xs-push-6">
+                    <button type="button" class="btn btn-default" onclick="fw.logic.previewMode();"><i class="glyphicon glyphicon-eye-open"></i> <?= __("Preview") ?></button>
+                    <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Save") ?></button>
+                </div>
+                <div class="col-xs-6 text-<?= __("_main_side") ?> col-xs-pull-6">
+                    <a class="btn btn-danger" href="<?= base_url("pages/edit") ?>"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+
+        $.extend(fw.logic, {
+            previewMode: function() {
+                $("#edit-mode").hide();
+                $("#preview-mode").html($("#content-editor").code());
+                $(".preview-mode").show();
+            },
+            editMode: function() {
+                $("#edit-mode").show();
+                $(".preview-mode").hide();
+            },
+            savePage: function() {
+                $("#page-form").submit();
+            },
+        });
+
+        $("#content-editor").summernote({
+        });
+    })
+</script>

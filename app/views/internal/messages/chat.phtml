@@ -1,0 +1,60 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $current_user CurrentUser */ ?>
+<?php /* @var $messages ChatMessagePresenterSet */ ?>
+<?php /* @var $chat ChatPresenter */ ?>
+<div class="header-region">
+    <div class="page-header">
+        <h1 class="visible-xs">
+            <?= __($title) ?>
+            <br />
+            <a style="font-size:50%;" href="#" onclick="fw.logic.showNoChat();"><i class="glyphicon glyphicon-chevron-left"></i></a>
+            <small><?= $chat->displayTitle() ?></small>
+        </h1>
+        <h1 class="hidden-xs">
+            <?= __($title) ?>
+            <small id="chat-title"><?= $chat->displayTitle() ?></small>
+        </h1>
+        <div>
+            <strong><?= __("Participants") ?>: </strong>
+            <?= $chat->paritcipantsCsv() ?>
+        </div>
+        <div class="pull-right hidden-xs">
+            <a href="#" onclick="fw.logic.confirmLeaveChat(<?= $chat->id ?>)" class="" title="<?= __("Leave Chat") ?>)"><i class="glyphicon glyphicon-off"></i> <?= __("Leave Chat") ?></a>
+            <?php if ($current_user->canEditChat($chat->model())): ?>
+                &nbsp; <a href="#" onclick="fw.logic.editChat()" class="" title="Edit Chat"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit Chat") ?></a>
+            <?php endif; ?>
+        </div>
+        <div class="text-muted"><?= __("Created on") ?> <?= $chat->time($this->currentUser()->timezone()) ?>.</div>
+        <div class="visible-xs" id="xs-buttons">
+            <a href="#" onclick="fw.logic.confirmLeaveChat(<?= $chat->id ?>)" class="btn btn-danger" title="<?= __("Leave Chat") ?>)"><i class="glyphicon glyphicon-off"></i> <?= __("Leave Chat") ?></a>
+            <?php if ($current_user->canEditChat($chat->model())): ?>
+                <a href="#" onclick="fw.logic.editChat()" class="btn btn-default" title="<?= __("Edit Chat") ?>)"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit Chat") ?></a>
+            <?php endif; ?>
+        </div>
+    </div>
+    <div class="hide">
+        <?php if ($current_user->canEditChat($chat->model())): ?>
+            <form class="form form-horizontal edit-chat-form" id="edit-chat-form" title="<?= __("Edit Chat") ?>" action="<?= base_url("messages/edit_chat") ?>" method="post" style="padding:0px 20px;">
+                <input type="hidden" name="id" value="<?= $chat->id ?>" />
+                <div class="form-group">
+                    <label class="control-label" for="chat-title-text"><?= __("Title") ?></label>
+                    <input class="input form-control" id="chat-title-text" name="title" placeholder="<?= __("Chat Title") ?>" value="<?= $chat->title ?>" />
+                </div>
+            </form>
+        <?php endif; ?>
+        <form class="" id="leave-chat-form" action="<?= base_url("messages/leave_chat") ?>" method="post" style="padding:0px 20px;">
+            <input type="hidden" name="id" value="<?= $chat->id ?>" />
+        </form>
+    </div>
+</div>
+<?php if ($messages->count() > 0): ?>
+    <div class="" id="chat-messages">
+        <?= $this->extend("internal/messages/messages.phtml") ?>
+    </div>
+<?php else: ?>
+    <div class="empty-chat" id="chat-messages">
+        <div class="text-muted">
+            <?= __("This conversation is empty.<br />Start the conversation by typing a new message.") ?>
+        </div>
+    </div>
+<?php endif; ?>

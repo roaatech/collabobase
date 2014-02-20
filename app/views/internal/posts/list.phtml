@@ -1,0 +1,288 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $posts Paginator */ ?>
+<?php /* @var $categories CategoryPresenterSet */ ?>
+<?php /* @var $users UserPresenterSet */ ?>
+<style type="text/css">
+
+    @media screen{
+        table#data-table tr#data-table-header th{
+            vertical-align: middle;
+        }
+
+        table#data-table tr#data-table-header th.sortable{
+            padding-right:24px;
+            background-repeat: no-repeat;
+            background-image: url(<?= base_url("assets/images/sort.png") ?>);
+            background-position: right center;
+        }
+        table#data-table tr#data-table-header th.sortable.asc{
+            background-image: url(<?= base_url("assets/images/sort-asc.png") ?>);
+        }
+        table#data-table tr#data-table-header th.sortable.desc{
+            background-image: url(<?= base_url("assets/images/sort-desc.png") ?>);
+        }
+
+    }
+
+    /*sm*/
+    @media screen and (min-width: 768px){
+        #form-controls{
+            margin-bottom:10px;
+        }
+
+        #list-category, #list-author{
+            width: 100%;
+        }
+    }
+
+    /*med*/
+    @media screen and (min-width: px){
+    }
+
+    /*lg*/
+    @media screen and (min-width: 1200px){
+    }
+
+    @media screen and (max-width: 767px){
+
+        #form-controls #buttons .btn{
+            display:block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+    }
+</style>
+<div class="container">
+
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <div class="visible-sm pull-right">
+                <a class="btn btn-primary btn-md" href="<?= base_url('posts/create') ?>"><i class="glyphicon glyphicon-plus-sign"></i> <?= __("New Discussion") ?></a>
+            </div>
+            <small>
+                <?= __($sub_title) ?>
+            </small>
+        </h1>
+    </div>
+
+
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+
+    <form id="search-and-filter" class="form form-inline" method="get">
+        <input type="hidden" id="sort-by" name="sort" value="lastActivity" />
+        <input type="hidden" id="sort-direction" name="direction" value="desc" />
+        <!--<div class="side-region white" style="padding:5px;">-->
+        <div class="row" id="form-controls">
+            <div class="col-sm-4 col-md-3 hidden-sm" id="buttons">
+                <a class="btn btn-primary btn-md" href="<?= base_url('posts/create') ?>"><i class="glyphicon glyphicon-plus-sign"></i> <?= __("New Discussion") ?></a>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <div class="form-group" id="category-region">
+                    <label class="control-label sr-only" for="list-category"><?= __("Author") ?></label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <?= __("Author") ?>
+                        </span>
+                        <select name="author" class="form-control" id="list-author" onchange="fw.logic.submitForm(this);">
+                            <option value=""><?= __("All authors") ?></option>
+                            <?= $users->asSelectListOptions($selected_author) ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <div class="form-group" id="category-region">
+                    <label class="control-label sr-only" for="list-category"><?= __("Category") ?></label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <?= __("Category") ?>
+                        </span>
+                        <select name="category" class="form-control" id="list-category" onchange="fw.logic.submitForm(this);">
+                            <option value=""><?= __("All categories") ?></option>
+                            <option value="uncategorized" <?= $selected_category == "uncategorized" ? "selected='selected'" : "" ?>><?= __("Uncategorized") ?></option>
+                            <?= $categories->asSelectListOptionsTree($selected_category) ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 col-md-3">
+                <div class="form-group" id="search-region">
+                    <label class="control-label sr-only" id="search-text"><?= __("Search") ?></label>
+                    <div class="input-group">
+                        <input class="input form-control" id="search-text" type="search" name="search" placeholder="<?= __("search") ?>" value="<?= $search ?>" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" id="update-list">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--</div>-->
+    </form>
+
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped table-bordered" id="data-table">
+            <tr class="" id="data-table-header">
+                <th style="width:3%;">#</th>
+                <?php if ($active): ?>
+                    <th class=""><?= __("Category") ?></th>
+                <?php else: ?>
+                    <th class="" style="width:12%"><?= __("Category") ?></th>
+                <?php endif; ?>
+                <th class="sortable" data-sort-by="title"><?= __("Post") ?></th>
+                <?php if ($active): ?>
+                    <th class="hidden-xs sortable" data-sort-by="author"><?= __("Author") ?></th>
+                    <th class="hidden-xs sortable" data-sort-by="post-date"><?= __("Post date") ?></th>
+                    <th class="hidden-xs sortable" data-sort-by="last-activity"><?= __("Last activity") ?></th>
+                    <th class="hidden-xs sortable" data-sort-by="last-active"><?= __("Last active") ?></th>
+                    <th class="hidden-xs sortable" data-sort-by="replies"><?= __("Replies") ?></th>
+                <?php else: ?>
+                    <th class="sortable" style="width: 20%;" data-sort-by="post-date"><?= __("Date / Time") ?></th>
+                <?php endif; ?>
+                <th style="width: 4%;"></th>
+            </tr>
+            <?php if ($posts->getTotal() > 0): ?>
+
+                <?php foreach ($posts as $i => $post): ?>
+                    <?php /* @var $post PostPresenter */ ?>
+                    <?php $post = $post->presenter(); ?>
+                    <tr>
+                        <td><?= $i ?></td>
+                        <td class="">
+                            <span class = ""><?= $post->category() ?></span>
+                        </td>
+                        <td>
+                            <span class="hidden-sm hidden-xs lead" style="margin-bottom: 5px;"><?= $post->title() ?></span>
+                            <br />
+                            <strong class="hidden-lg hidden-md"><?= $post->title() ?></strong>
+                            <?php if ($active): ?>
+                                <?= $post->scrambled(10) ?>
+                                <ul class="visible-xs text-muted list-unstyled">
+                                    <small>
+                                        <li><?= __("Posted by") ?> <?= $post->writer() ?>, <?= date_human($post->time(), $this->currentUser()->timezone(), "j F Y, h:i a", "j F, h:i a", false) ?>, <?= __("in") ?> <?= $post->category() ?>.</li>
+                                        <li><?= __("Last activity by") ?> <?= $post->lastReplier() ?>, <?= date_human($post->last_reply_time(), $this->currentUser()->timezone(), "j F Y, h:i a", "j F, h:i a", false) ?>.</li>
+                                        <li><?= __("Total replies") ?> <?= $post->totalReplies() ?>.</li>
+                                    </small>
+                                </ul>
+                            <?php else: ?>
+                                <?= $post->content ?>
+                            <?php endif; ?>
+                        </td>
+                        <?php if ($active): ?>
+                            <td class = "hidden-xs">
+                                <span class = ""><?= ucfirst($post->writer()) ?></span>
+                            </td>
+                            <td class = "hidden-xs">
+                                <?= pass(date_human($post->time(), $this->currentUser()->timezone(), "j F Y, h:i a", "j F, h:i a", false), "ucfirst") ?>
+                            </td>
+                            <td class = "hidden-xs">
+                                <?= pass(date_human($post->last_reply_time(), $this->currentUser()->timezone(), "j F Y, h:i a", "j F, h:i a", false), "ucfirst") ?>
+                            </td>
+                            <td class = "hidden-xs">
+                                <?= $post->lastReplier() ?>
+                            </td>
+                            <td class="text-left hidden-xs" style=""><?= $post->totalReplies() ?></td>
+                        <?php else: ?>
+                            <td>
+                                <?= pass(date_human($post->time(), $this->currentUser()->timezone(), "j F Y, h:i a", "j F, h:i a", false), "ucfirst") ?>
+                            </td>
+                        <?php endif; ?>
+                        <td class="text-center" style="font-size:20px; vertical-align: middle;"><a href="<?= $post->viewUrl() ?>"><i class="glyphicon glyphicon-circle-arrow-<?= __("_sub_side") ?>"></i></a></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <td colspan="9">
+                    <small class="text-muted">
+                        <?= __("No posts are matching") ?> <?= $search ? __("the search '") . $search . __("' you have entered") : "" ?> <?= $search && $selected_category ? __("and") : "" ?> <?= $selected_category ? __("the category you have selected") : "" ?>!
+                    </small>
+                </td>
+            <?php endif; ?>
+        </table>
+
+        <?php if ($posts->getPagesCount() > 1): ?>
+            <ul class="pagination pull-right">
+                <li class="<?= $posts->getCurrentPage() == 1 ? "disabled" : "" ?>"><a href="<?= $posts->getCurrentPage() > 1 ? base_url("posts/" . ($posts->getCurrentPage() - 1) . "?$qs") : "#" ?>">&laquo;</a></li>
+                <?php $start = $posts->getCurrentPage() - 2; ?>
+                <?php if ($start + 4 > $posts->getPagesCount()) $start-=$start + 4 - $posts->getPagesCount(); ?>
+                <?php if ($start < 1) $start = 1; ?>
+                <?php
+                for ($i = $start; $i < $start + 5 && $i <= $posts->getPagesCount(); $i++):
+                    ?>
+                    <li class="<?= $i == $posts->getCurrentPage() ? "active" : "" ?>"><a href="<?= $i == $posts->getCurrentPage() ? "#" : base_url("posts/$i" . "?$qs") ?>"><?= $i ?></a></li>
+                <?php endfor; ?>
+                <li class="<?= $posts->getCurrentPage() == $posts->getPagesCount() ? "disabled" : "" ?>"><a href="<?= $posts->getCurrentPage() < $posts->getPagesCount() ? base_url("posts/" . ($posts->getCurrentPage() + 1) . "?$qs") : "#" ?>">&raquo;</a></li>
+            </ul>
+        <?php endif; ?>
+
+        <small>
+            <?= __("Showing posts") ?> <?= $posts->getStart() ?> - <?= $posts->getEnd() ?> <?= __("from") ?> <?= $posts->getTotal() ?>.
+        </small>
+
+    </div>
+
+</div>
+<script>
+    $(document).ready(function() {
+        $.extend(fw.temporary, {
+            posts: {
+                list: {
+                    order: {
+                        column: '<?= $sort_by_column ?>',
+                        direction: '<?= $sort_by_direction ?>',
+                    }
+                }
+            }
+        });
+        $.extend(fw.logic, {
+            submitForm: function(object) {
+                if (object === undefined) {
+                    object = $("button#update-list").get(0);
+                }
+                $(object).closest("form").submit();
+            },
+            sortBy: function(e) {
+                object = this;
+                if (!$(object).hasClass('sortable')) {
+                    return;
+                }
+                if (fw.temporary.posts.list.order.column != $(object).data('sort-by')) {
+                    fw.temporary.posts.list.order.column = $(object).data('sort-by');
+                    fw.temporary.posts.list.order.direction = 'asc';
+                } else {
+                    if (fw.temporary.posts.list.order.direction == 'asc') {
+                        fw.temporary.posts.list.order.direction = 'desc';
+                    } else {
+                        fw.temporary.posts.list.order.direction = 'asc';
+                    }
+                }
+                fw.logic.submitForm();
+            },
+            formSubmitHandler: function(e) {
+                $(this).find("#sort-by").val(fw.temporary.posts.list.order.column);
+                $(this).find("#sort-direction").val(fw.temporary.posts.list.order.direction);
+                return true;
+            },
+        });
+
+        $("#data-table-header th.sortable").each(function() {
+            console.log(this);
+            console.log($(this).data('sort-by'));
+            console.log(fw.temporary.posts.list.order.column);
+            $(this).click(fw.logic.sortBy).css("cursor", "pointer");
+            if (fw.temporary.posts.list.order.column == $(this).data('sort-by')) {
+                $(this).addClass(fw.temporary.posts.list.order.direction);
+            }
+        });
+
+        $("form#search-and-filter").submit(fw.logic.formSubmitHandler);
+    });
+
+</script>

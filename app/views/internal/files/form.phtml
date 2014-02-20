@@ -1,0 +1,234 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $categories CategoryPresenterSet */ ?>
+<?php /* @var $file FileModel */ ?>
+<?php /* @var $action string */ ?>
+<?php
+$file_title = "";
+$file_description = "";
+$file_version = 1;
+$file_category = "";
+$file_tags = "";
+switch ($action) {
+    case 'edit_file':
+        $sub_title = "<a href='" . base_url("files") . "'>".__("Files List")."</a> &gt; <a href='" . FilePermaLink::view($file->id) . "'>" . $file->title . "</a> &gt; ".__("Edit File");
+        $file_title = $file->title;
+        $file_description = $file->post()->content();
+        $file_category = $file->post()->category();
+        $file_tags = $file->post()->presenter()->tagsCsv();
+        break;
+    case 'new_version':
+        $sub_title = "<a href='" . base_url("files") . "'>".__("Files List")."</a> &gt; <a href='" . FilePermaLink::view($file->id) . "'>" . $file->title . "</a> &gt; ".__("New Version");
+        break;
+    case 'new_file':
+        $sub_title = __("Upload New File");
+        break;
+    default:
+        break;
+}
+?>
+<script type="text/javascript" src="<?= base_url("assets/js/summernote.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/summernote-me.css") ?>" />
+<script type="text/javascript" src="<?= base_url("assets/js/selectize.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/selectize.bootstrap3.css") ?>" />
+<style type="text/css">
+    @media screen{
+        #file-form .control-group{
+            margin-bottom: 10px;
+        }
+
+        #file-form textarea{
+            resize: vertical;
+        }
+    }
+    @media screen and (min-width: 768px){
+    }
+    @media screen and (min-width: 992px){
+        .filler-side-region{
+            background-color:#f8f8f8;
+            margin-top:-20px;
+            margin-bottom:-20px;
+            padding:10px;
+            /*min-height: 350px;*/
+        }
+        .filler-side-region .btn{
+            display:block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        .filler-side-region .btn:last-child{
+            margin-bottom: 0px;
+        }
+    }
+</style>
+<div class="container">
+
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="visible-xs" />
+            <small>
+                <?= $sub_title ?>
+            </small>
+        </h1>
+    </div>
+
+    <div class="row">
+        <form id="file-form" class="form" action="<?= $target_action ?>" method="post" enctype="multipart/form-data">
+            <div class="col-md-9">
+                <?php if ($operation_result): ?>
+                    <?= operationResult($operation_result) ?>
+                <?php endif; ?>
+
+                <?php if ($action != "new_file"): ?>
+                    <input type="hidden" name="id" value="<?= $file->id ?>" />
+                <?php endif; ?>
+
+                <?php if ($action != "edit_file"): ?>
+                    <div class="control-group">
+                        <label class="control-label" for="file-file"><?= __("Choose the file") ?></label>
+                        <input class="form-control original-control required" required="required" type="file" id="file-file" name="file" placeholder="<?= __("Choose a file") ?>" />
+                        <!--<div class="hide text-danger" id="file-file-error"></div>-->
+                    </div>
+                <?php endif; ?>
+                <?php if ($action != "new_version"): ?>
+                    <div class="control-group">
+                        <label class="control-label" for="file-title"><?= __("File title") ?></label>
+                        <input class="form-control original-control required" required="required" type="text" id="file-title" name="title" placeholder="<?= __("Enter a title") ?>" value="<?= $file_title ?>" />
+                        <!--<div class="hide text-danger" id="file-title-error"></div>-->
+                    </div>
+                <?php endif; ?>
+                <div class="control-group">
+                    <label class="control-label" for="file-description"><?= __("File description") ?></label>
+                    <textarea class="form-control original-control required" id="file-description" name="description" placeholder="<?= __("Enter a description") ?>"><?= $file_description ?></textarea>
+                    <!--<div class="hide text-danger" id="file-description-error"></div>-->
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filler-side-region">
+                    <?php if ($action != "edit_file"): ?>
+                        <div class="control-group">
+                            <label class="control-label" for="file-version"><?= __("Version") ?></label>
+                            <input class="form-control original-control required" required="required" type="number" min="<?= $action == "new_version" ? $file->version + 0.1 : 0.1 ?>" step="0.1" id="file-version" name="version" placeholder="<?= __("Enter a version") ?>" value="<?= $action == "new_version" ? $file->version + 0.1 : 1 ?>" />
+                            <!--<div class="hide text-danger" id="file-title-error"></div>-->
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($action != "new_version"): ?>
+                        <div class="control-group">
+                            <label class="control-label" for="file-category"><?= __("Category") ?></label>
+                            <select class="form-control original-control" id="file-category" name="category"><?= $categories->asSelectListOptionsTree(null, "Uncategorized") ?></select>
+                            <?php if ($file_category): ?>
+                                <script>
+                                    $("#file-category option[value=<?= $file_category->id() ?>]").attr("selected", "selected");
+                                </script>
+                            <?php endif; ?>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="file-tags"><?= __("Tags") ?></label>
+                            <input class="form-control original-control" type="text" id="file-tags" name="tags" placeholder="<?= __("Add file tags") ?>" value="<?= $file_tags ?>" />
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="col-md-12 hidden-xs">
+                <hr />
+                <?php if ($action != "edit_file"): ?>
+                    <button class="pull-right btn btn-primary" type="submit"><i class="glyphicon glyphicon-upload"></i> <?= __("Upload") ?></button>
+                <?php else: ?>
+                    <button class="pull-right btn btn-primary" type="submit"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Save") ?></button>
+                <?php endif; ?>
+                <a class="btn btn-danger" href="<?= $return_path ?>"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></a>
+            </div>
+            <div class="col-xs-12 visible-xs">
+                <?php if ($action != "edit_file"): ?>
+                    <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-upload"></i> <?= __("Upload") ?></button>
+                <?php else: ?>
+                    <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Save") ?></button>
+                <?php endif; ?>
+                <a class="btn btn-danger" href="<?= $return_path ?>"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></a>
+            </div>
+        </form>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+    jQuery(function() {
+
+        $.extend(fw.logic, {
+            submitForm: function(form) {
+            }
+        });
+
+        $("#file-description").summernote({
+            toolbar: [
+                ['style', ['style']], // no style button
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['help', ['fullscreen']],
+//                ['height', ['height']],
+//                ['insert', ['picture', 'link']], // no insert buttons
+//                ['table', ['table']], // no table button
+//                ['help', ['help']] //no help button
+            ]
+        });
+
+
+        $("#file-category").selectize({
+            render: {
+                item: function(item, escape) {
+                    return "<div>" + trim(escape(item.text)) + "</div>";
+                }
+            },
+            onChange: function(value) {
+                displayValue = trim(this.getOption(value).text());
+                if (!displayValue)
+                    displayValue = "Uncategorized";
+            },
+        });
+
+        $("#file-tags").selectize({
+            persist: false,
+            maxOptions: 5,
+            valueField: 'tag',
+            labelField: 'tag',
+            searchField: ['tag'],
+//            options: [
+//                {tag: 'aaa'}, {tag: 'bbb'}, {tag: 'ccc'}
+//            ],
+            render: {
+                item: function(item, escape) {
+                    return "<div>" + escape(item.tag) + "</div>";
+                },
+                option: function(item, escape) {
+                    return "<div>" + escape(item.tag) + "</div>";
+                }
+            },
+            create: function(input) {
+                return {tag: input};
+            },
+            load: function(query, callback) {
+                if (!query.length)
+                    return callback();
+                $.ajax({
+                    url: '<?= base_url('tags/search/') ?>' + encodeURIComponent(query),
+                    type: 'GET',
+                    error: function() {
+                        callback();
+                    },
+                    success: function(res) {
+                        callback(res);
+                    }
+                });
+            },
+            onChange: function(value) {
+            },
+        });
+
+        $("form#file-form").submit(function() {
+            return fw.logic.submitForm(this);
+        });
+    });
+</script>

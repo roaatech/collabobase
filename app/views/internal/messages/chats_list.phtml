@@ -1,0 +1,30 @@
+<a id="new-chat-handler" href="#" class="list-group-item" onclick="fw.logic.newChat()" style="">
+    <span class="pull-right">
+        <i class="glyphicon glyphicon-plus-sign"></i>
+    </span>
+    <h4 class="list-group-item-heading content">
+        <?= __("Start New conversation") ?>
+    </h4>
+    <p class="list-group-item-text content"><?= __("New user or group conversation") ?>.</p>
+</a>
+<?php if ($chats->count() > 0): ?>
+    <?php foreach ($chats as $id => $chat): ?>
+        <?php /* @var $chat ChatPresenter */ ?>
+        <a class="chat-handler chat-<?= $chat->id ?>-handler list-group-item" href="#" onclick="fw.logic.loadChat(<?= $chat->id ?>, '<?= html_entity_encode($chat->displayTitle()) ?>')" style="">
+            <span class="pull-right badge">
+                <?= array_key_exists($id, $counts) ? $counts[$id] : 0 ?>
+                <!--<i class="glyphicon glyphicon-chevron-right"></i>-->
+            </span>
+            <h4 class="list-group-item-heading content">
+                <?= $chat->displayTitle() ?>
+            </h4>
+            <p class="list-group-item-text content"><?= $chat->excerpt(5, $this->currentUser()->model()) ?>...</p>
+        </a>
+    <?php endforeach; ?>
+<?php else: ?>
+    <div style="padding:20px;">
+        <div class="text-muted">
+            <?= __("You do not have any conversations yet!") ?>
+        </div>
+    </div>
+<?php endif; ?>

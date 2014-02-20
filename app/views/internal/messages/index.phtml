@@ -1,0 +1,507 @@
+<?php /* @var $this MY_Loader */ ?>
+<?php /* @var $current_user CurrentUser */ ?>
+<?php /* @var $chats ChatPresenterSet */ ?>
+<?php /* @var $users UserPresenterSet */ ?>
+<script type="text/javascript" src="<?= base_url("assets/js/selectize.min.js") ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?= base_url("assets/css/selectize.bootstrap3.css") ?>" />
+<!--<script type="text/javascript" src="<?= base_url("assets/js/jquery.tbs.showcroll.js") ?>"></script>-->
+<style type="text/css">
+
+    @media screen{
+
+        #side-region{
+            overflow-x: hidden;
+        }
+
+        #side-region .page-header{
+            border-bottom:none;
+        }
+
+        #outer-container #no-chat-area{
+            display:block;
+        }
+        #outer-container #chat-area{
+            display:none;
+        }
+
+        #outer-container.chat-shown #no-chat-area{
+            display:none;
+        }
+
+        #outer-container.chat-shown #chat-area{
+            display:block;
+        }
+
+    }
+
+    @media screen and (min-width: 768px){
+
+        #main-region{
+            padding-top:140px;
+            padding-bottom: 55px;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        #main-region .header-region{
+            position: absolute;
+            top:0px;
+            height: 140px;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            width: 100%;
+        }
+        #main-region #chat-area{
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #main-region .footer-region{
+            position: absolute;
+            bottom:0px;
+            width: 100%;
+            height: 51px;
+            overflow: hidden;
+        }
+
+        #side-region{
+            padding-bottom: 90px;
+        }
+
+        #side-region #footer-region{
+            position: absolute; 
+            bottom:5px; 
+            height: 71px; 
+            overflow:hidden;
+        }
+
+        #side-region .list-group{
+            background-color:#f8f8f8;
+            margin:0px 0px -20px;
+            height: 100%;
+            overflow-y: hidden;
+            overflow-x: hidden;
+        }
+        #side-region .list-group:hover{
+            overflow-y: auto;
+        }
+
+        #side-region .list-group .list-group-item{
+            border-radius: 0px!important;
+            -moz-border-radius: 0px!important;
+            border:none;
+            background-color: transparent;
+            border:1px solid #ebebeb;
+            border-collapse: collapse;
+            cursor: pointer;
+        }
+        #side-region .list-group .list-group-item:last-child{
+        }
+        #side-region .list-group .list-group-item:hover,.list-group .list-group-item:focus{
+            background-color:#f0ebfb;
+        }
+        #side-region .list-group .list-group-item.active{
+            background-color:#ffffff;
+            border-right: none;
+            border-color:#797979;
+            border-left-width: 10px;
+        }
+        #side-region .list-group .list-group-item.active .content{
+            color:#2fa4e7;
+        }
+        #side-region .list-group .list-group-item.active .badge{
+            display: none;
+        }
+    }
+
+    @media screen and (max-width: 767px){
+        #outer-container #side-region{
+            display:block;
+        }
+        #outer-container #main-region{
+            display:none;
+        }
+        #outer-container.chat-shown #side-region{
+            display:none;
+        }
+        #outer-container.chat-shown #main-region{
+            display:block;
+        }
+
+        #side-region .page-header{
+            margin:60px 0px 0px;
+        }
+
+        #main-region{
+            padding-top:50px;
+        }
+
+        #main-region #chat-area{
+            padding-bottom: 60px;
+        }
+
+        #main-region #chat-form{
+            position: fixed;
+            bottom: 0px;
+            background-color:white;
+        }
+
+        #main-region .header-region .page-header #xs-buttons .btn{
+            display: block;
+        }
+
+    }
+</style>
+<div id="outer-container" class="container full-height">
+    <div class="row full-height">
+        <div id="side-region" class="col-sm-4 col-md-4 col-lg-3 full-height overflow-x-hidden overflow-y-auto">
+            <div class="header-region">
+                <div class="page-header visible-xs">
+                    <h1>
+                        <?= __($title) ?>
+                        <br class="visible-xs" />
+                        <small class="visible-xs" id="subtitle"><?= $sub_title ?></small>
+                    </h1>
+                </div>
+            </div>
+            <div id="chats-list" class="list-group ">
+                <?php $this->extend("internal/messages/chats_list.phtml"); ?>
+            </div>
+            <div id="footer-region">
+                <?php $this->extend("templates/common/footer_condenced.phtml"); ?>
+            </div>
+        </div>
+        <div id="main-region" class="col-sm-8 col-md-8 col-lg-9 full-height" style="">
+            <div id="no-chat-area" class="">
+                <?php if ($operation_result): ?>
+                    <?= operationResult($operation_result) ?>
+                <?php endif; ?>
+                <div class="header-region">
+                    <div class="page-header">
+                        <h1>
+                            <?= __($title) ?>
+                            <small id="subtitle"><?= $sub_title ?></small>
+                        </h1>
+                        <div class="text-muted"><?= __("Please select a conversation from the left!") ?></div>
+                    </div>
+                </div>
+                <div id="no-chat-script">
+                    <div class="text-muted">
+                        <?= __("Conversation script will appear here.") ?>
+                    </div>
+                </div>
+            </div>
+            <div id="chat-area" class="">
+                <div class="footer-region keep-on-change">
+                    <form id="chat-form" class="form" onsubmit="return fw.logic.sendChat();">
+                        <input type="hidden" id="chat-id" name="id" value="" />
+                        <div class="input-group">
+                            <input type="text" id="chat-input" class="input form-control" placeholder="<?= __("Type a message then click 'send'") ?>" />
+                            <a id="send-handler" class="input input-group-addon btn btn-default" href="#" onclick="fw.logic.sendChat()"><i class="glyphicon glyphicon-send"></i> <?= __("Send") ?></a>
+                        </div>
+                        <br />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hide"> <!--hidden at start-->
+    <form class="form form-horizontal new-chat-form" title="<?= __("Start a New Conversation") ?>" action="<?= base_url("messages/new_chat") ?>" method="post">
+        <input class="chat-participants" type="hidden" name="participants" />
+        <input class="chat-id" type="hidden" name="id" />
+        <div class="control-group">
+            <label class="control-label"><?= __("Select a user") ?></label>
+            <select multiple="multiple" required="required" name="participants-sel" id="users-select" class="required users-select form-control" placeholder="<?= __("Select users") ?>)">
+                <?= $users->asSelectListOptions() ?>
+            </select>
+        </div>
+        <div class="control-group">
+            <label class="control-label"><?= __("Conversation Title") ?></label>
+            <input class="form-control" type="text" name="title" placeholder="<?= __("Type conversation title") ?>)" />
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    fw.temporary.sendStarted = false;
+    fw.temporary.currentChatId = null;
+    $.extend(fw.logic, {
+        loadChat: function(id, title) {
+            try {
+                fw.ui.loading.show();
+                badge = $(".chat-handler").removeClass("active").filter(".chat-" + id + "-handler").addClass('active').find(".badge");
+                count = parseInt(badge.html());
+                badge.html("0");
+                if (count > 0) {
+                    badge = $(".messages-handler.has-count-badge").find(".badge");
+                    tcount = parseInt(badge.html());
+                    badge.html(tcount - 1 >= 0 ? tcount - 1 : 0);
+                }
+                this.disableChat();
+                fw.temporary.loadingChatId = id;
+                fw.temporary.loadingChatTitle = title;
+                $("#chat-area > *:not(.keep-on-change)").remove();
+                this.showChat();
+                this.disableChat();
+                $.ajax({
+                    url: "<?= base_url("messages/chat/") ?>" + id,
+                    context: document.getElementById('chat-area'),
+                    success: function(txt, sts, xhr) {
+                        $("#chat-area #chat-id").val(fw.temporary.loadingChatId);
+                        $("#chat-area").prepend(txt);
+                        fw.logic.scrollChatArea();
+                        fw.logic.enableChat();
+                        fw.temporary.currentChatId = fw.temporary.loadingChatId;
+                        delete fw.temporary.loadingChatId;
+                        delete fw.temporary.loadingChatTitle;
+                        fw.ui.loading.hide();
+//                    document.title = fw.temporary.loadingChatTitle;
+//                    window.history.pushState({"html": txt, "pageTitle": fw.temporary.loadingChatTitle}, "", "<?= base_url("messages/") ?>" + fw.temporary.loadingChatId);
+                    },
+                });
+            } catch (ex) {
+                delete fw.temporary.loadingChatId;
+                $("#no-chat-area #no-chat-script").html("<div class='text-danger'><div class='lead'>Chat loading error!</div><div>Can not load the required chat. Please try again later...</div></div>")
+                fw.logic.showNoChat();
+            }
+        },
+        disableChat: function() {
+            $("#chat-area").find(".input, .form-control, input").attr("disabled", "disabled").addClass("disabled");
+            $("#chat-area #send-handler").html('<i class="glyphicon glyphicon-time"></i> <?= __("Wait") ?>');
+        },
+        enableChat: function() {
+            $("#chat-area").find(".input, .form-control, input").removeAttr("disabled").removeClass("disabled");
+            $("#chat-area #send-handler").html('<i class="glyphicon glyphicon-send"></i> <?= __("Send") ?>');
+        },
+        sendChat: function() {
+            chatId = $("#chat-area #chat-id").val();
+            message = $("#chat-area #chat-input").val();
+            if (!chatId || isNaN(chatId) || !message || message.trimSpaces().lenth == 0)
+                return false;
+            this.startSend();
+            $.post("<?= base_url("messages/send") ?>", {"id": chatId, "message": message}, function(data, sts, xhr) {
+
+                fw.logic.endSend();
+
+                chatMessages = $("#chat-messages");
+                if (chatMessages.hasClass("empty-chat")) {
+                    chatMessages.html(data);
+                    chatMessages.removeClass("empty-chat");
+                } else {
+                    chatMessages.append(data);
+                }
+                fw.logic.scrollChatArea();
+
+                switch (xhr.status) {
+                    case 211:
+                        $("#chat-area #chat-input").get(0).focus();
+                        break;
+                    case 200:
+                        $("#chat-area #chat-input").val("").get(0).focus();
+                        break;
+                    case 302:
+                        //Do a login redirection
+                        break;
+                }
+
+            });
+            return false;
+        },
+        pushStateChanged: function(e) {
+            if (e.state) {
+                $("#chat-script").html(e.state.html);
+                document.title = e.state.pageTitle;
+            }
+        },
+        startSend: function() {
+            if (this.isSendStarted()) {
+                return false;
+            }
+            fw.temporary.sendStarted = true;
+            this.disableChat();
+            return true;
+        },
+        endSend: function() {
+            if (!this.isSendStarted()) {
+                return false;
+            }
+            fw.temporary.sendStarted = false;
+            this.enableChat();
+            return true;
+        },
+        isSendStarted: function() {
+            return fw.temporary.sendStarted === true;
+        },
+        showNoChat: function() {
+            $("#no-chat-area").show();
+            $("#chat-area").hide();
+            $("#outer-container").removeClass("chat-shown");
+        },
+        showChat: function() {
+            $("#no-chat-area").hide();
+            $("#chat-area").show();
+            $("#outer-container").addClass("chat-shown");
+        },
+        newChat: function() {
+            $(".new-chat-form").showdal({
+                onShown: function(e) {
+                    $(this).find("select.users-select").selectize({
+                        create: false,
+                        hideSelected: true,
+                        delimiter: ",",
+                        onChange: function(value) {
+                            res = "";
+                            for (i in value) {
+                                res += (i > 0 ? "," : "") + value[i];
+                            }
+                            $(".chat-participants").val(res);
+                        },
+                    });
+                },
+                copy: true,
+                buttons: {
+                    "Cancel": {
+                        "class": "btn btn-default pull-left",
+                        "action": function() {
+                            $(this).showdal('hide');
+                        },
+                        title: "<?= __("Cancel") ?>"
+                    },
+                    "Create": {
+                        "class": "btn btn-primary",
+                        "action": function() {
+                            modal = $(this).closest(".modal");
+                            modal.find(".alert").remove();
+                            if (!modal.find(".users-select").val()) {
+                                modal.find(".modal-body").showlert("You should select at least one user.", {title: "Error! ", type: "danger", dismissAfter: 5000});
+                                return false;
+                            }
+                            modal.find("form").submit();
+                            $(this).showdal('hide');
+                        },
+                        "title": "<?= __("Create") ?>"
+                    },
+                }
+            });
+        },
+        getNewMessages: function() {
+            chatId = fw.temporary.currentChatId;
+            if (chatId != null) {
+                $.ajax("<?= base_url("messages/loadChatNewMessages/") ?>" + chatId, {
+                    success: function(data, status, xhr) {
+                        switch (xhr.status) {
+                            case 200:
+                                chatMessages = $("#chat-messages");
+                                if (chatMessages.hasClass("empty-chat")) {
+                                    chatMessages.html(data);
+                                    chatMessages.removeClass("empty-chat");
+                                } else {
+                                    chatMessages.append(data);
+                                }
+                                fw.logic.scrollChatArea();
+                                break;
+                            case 204:
+                                break;
+                        }
+                    },
+                });
+            }
+        },
+        getChatsList: function() {
+//            chatId = fw.temporary.currentChatId;
+            url = "<?= base_url("messages/chats_list") ?>";
+//            if (chatId !== null) {
+//                url += "/" + chatId;
+//            }
+            $("#chats-list").load(url, {}, function(data, status, xhr) {
+                chatId = fw.temporary.currentChatId;
+                if (chatId !== null) {
+                    $(".chat-handler.chat-" + chatId + "-handler").addClass('active').find(".badge").html("0");
+                }
+            });
+        },
+        scrollChatArea: function() {
+            $("#chat-area").scrollTop($("#chat-area")[0].scrollHeight + 100);
+        },
+        scrollChatAreaIfNeeded: function() {
+            ca = $("#chat-area");
+//            console.log(ca.scrollTop());
+//            console.log(ca[0].scrollHeight);
+        },
+        editChat: function() {
+            $("#edit-chat-form").clone().showdal({
+                buttons: {
+                    Save: {
+                        action: function() {
+                            fw.ui.loading.show();
+                            $(this).showdal('hide');
+                            $(this).closest(".modal-content").find("form").submit();
+                        },
+                        class: "btn btn-primary",
+                        title: "<?= __("Save") ?>"
+                    },
+                    Cancel: {
+                        action: function() {
+                            $(this).showdal('hide');
+                        },
+                        class: "btn btn-danger pull-left",
+                        "title": "<?= __("Cancel") ?>"
+                    },
+                },
+            });
+        },
+        confirmLeaveChat: function(chatId) {
+            $.showdal({
+                title: "<?= __("Leave Chat Confirmation") ?>",
+                body: "<?= __("Are you sure you want to leave this chat?") ?>",
+                buttons: {
+                    Leave: {
+                        title: "<i class='glyphicon glyphicon-off'></i> Leave Chat",
+                        action: function() {
+                            $(this).showdal("hide");
+                            fw.ui.loading.show();
+                            $("#leave-chat-form").submit();
+                        },
+                        class: "btn btn-danger",
+                        "title": "<?= __("Leave") ?>"
+                    },
+                    Cancel: {
+                        action: function() {
+                            $(this).showdal("hide");
+                        },
+                        class: "btn btn-default pull-left",
+                        "title": "<?= __("Cancel") ?>"
+                    }
+                },
+            });
+        },
+    });
+
+    $(function() {
+
+        window.setInterval("fw.logic.getNewMessages()", 2000);
+        window.setInterval("fw.logic.getChatsList()", 5000);
+        //window.onpopstate = fw.logic.pushStateChanged;
+
+        $("#chats-list").mouseleave(function() {
+            html = $(this).html();
+            $(this).html(html);
+        });
+
+        if (<?= $start_new_chat ?>) {
+            fw.logic.newChat();
+        }
+
+    });
+
+
+</script>
+<?php if (isset($load_chat_directly) && !empty($load_chat_directly)): ?>
+    <script>
+        fw.logic.loadChat(<?= $load_chat_directly ?>);
+    </script>
+<?php endif; ?>

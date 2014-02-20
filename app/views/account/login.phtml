@@ -1,0 +1,43 @@
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="page-header">
+                <h1 class="text-center">
+                    <?= __("T4F Web Portal") ?>
+                    <br class="visible-xs" />
+                    <small><?= __("Login Page") ?></small>
+                </h1>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4" id="login-region">
+            <form method="post" action="<?= base_url('account/dologin') ?>" class="form" role="form">
+                <!--<h3>Login Area</h3>-->
+                <?php if ($num_of_errors > 0): ?>
+                    <div class="has-error" style="margin-bottom: 15px;">
+                        <div class="control-label">
+                            <?= $errors ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <div class="form-group">
+                    <label for="usernameTxt" class="control-label"><?= __("Username") ?></label>
+                    <input type="text" name="username" id="usernameTxt" required="required" class="required form-control" placeholder="<?= __("username") ?>" value="<?= set_value('username') ?>" autofocus="true" />
+                </div>
+                <div class="form-group">
+                    <label for="passwordTxt" class="control-label"><?= __("Password") ?></label>
+                    <input type="password" name="password" id="passwordTxt" required="required" class="required form-control" placeholder="<?= __("password") ?>" />
+                </div>
+                <button type="submit" class="btn btn-primary"><?= __("Submit") ?></button>
+            </form>
+<!--            <div class="row">
+                <div class="col-xs-12" id="bottom-links">
+                    <ul class="list-unstyled">
+                        <li><a href="<?= base_url('account/reset_password') ?>"><?= __("Forgot your password?") ?></a></li>
+                    </ul>
+                </div>
+            </div>-->
+        </div>
+    </div>
+</div>

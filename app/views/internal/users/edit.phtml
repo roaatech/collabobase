@@ -1,0 +1,216 @@
+<?php if (!@$this->form_validation) $this->library('form_validation'); ?>
+<?php /* @var $model UserModel */ ?>
+<script type="text/javascript" src="<?= base_url("assets/js/bootstrap-datepicker.js") ?>"></script>
+<link type="text/css" rel="stylesheet" href="<?= base_url("assets/css/datepicker.css") ?>" />
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <?= __($title) ?>
+            <br class="hidden-lg hidden-md" />
+            <small>
+                <?php if ($is_me): ?>
+                    <a href="<?= base_url($return_url) ?>"><?= __($sub_title) ?></a> <span class="text-muted"> &gt; </span>
+                <?php else: ?>
+                    <a href="<?= base_url("users") ?>"><?= __($sub_title) ?></a> <span class="text-muted"> &gt; </span> <a href="<?= base_url("$return_url") ?>"><?= $model->col('full_name', $model->col('username')) ?></a> <span class="text-muted"> &gt; </span>
+                <?php endif; ?>
+                <?= __("Edit Profile") ?>
+            </small>
+        </h1>
+    </div>
+    <?php if ($operation_result): ?>
+        <?= operationResult($operation_result) ?>
+    <?php endif; ?>
+    <form id="edit-profile-form" class="form form-horizontal" action="<?= base_url("users/do_edit") ?>" method="post" role="form">
+        <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+        <input type="hidden" name="return_url" value="<?= $return_url ?>" />
+        <div class="row">
+            <div class="col-sm-6">
+                <h3><?= __("Personal Information") ?></h3>
+                <div class="form-group">
+                    <label for="first_name_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("first_name", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="first_name" id="first_name_txt" placeholder="<?= __("Enter the " . pass("first_name", "labelize,strtolower")) ?>" value="<?= nvl(@$post['first_name'], $model->col('first_name')) ?>" class="form-control required" required="required" />
+                        <div class="error start-hidden first_name_txt required"><?= __(pass("first_name", "labelize,strtolower,ucfirst") . " is required!") ?></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="second_name_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("second_name", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="second_name" id="second_name_txt" placeholder="<?= __("Enter the second name") ?>" value="<?= nvl(@$post['second_name'], $model->col('second_name')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="last_name_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("last_name", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="last_name" id="last_name_txt" placeholder="<?= __("Enter the last name") ?>" value="<?= nvl(@$post['last_name'], $model->col('last_name')) ?>" class="form-control required" required="required" />
+                        <div class="error start-hidden last_name_txt required"><?= pass("last_name", "labelize,strtolower,ucfirst") ?> is required!</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="birth_date_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("birth_date", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="birth_date" id="birth_date_txt" placeholder="<?= __("Enter the birth date") ?>" value="<?= dt(nvl(@$post['birth_date'], $model->col('birth_date')), 'm/d/Y') ?>" class="form-control datepicker" />
+                    </div>
+                </div>
+
+
+                <h3><?= __("Contact Information") ?></h3>
+                <div class="form-group">
+                    <label for="main_phone_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("main_phone", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="contact_main_phone" id="main_phone_txt" placeholder="<?= __("Enter the main phone") ?>" value="<?= nvl(@$post['contact_main_phone'], $model->col('user_contact:main_phone')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="alternative_phone_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("alternative_phone", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="contact_alternative_phone" id="alternative_phone_txt" placeholder="<?= __("Enter the alternative phone") ?>" value="<?= nvl(@$post['contact_alternative_phone'], $model->col('user_contact:alternative_phone')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("email", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="contact_email" id="email_txt" placeholder="<?= __("Enter the email") ?>" value="<?= nvl(@$post['contact_email'], $model->col('user_contact:email')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="skype_id_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __("Skype ID") ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="contact_skype_id" id="skype_id_txt" placeholder="<?= __("Enter the Skype ID") ?>" value="<?= nvl(@$post['contact_skype_id'], $model->col('user_contact:skype_id')) ?>" class="form-control" />
+                    </div>
+                </div>
+
+
+                <h3><?= __("Emergency Contact Information") ?></h3>
+                <div class="form-group">
+                    <label for="full_name_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("full_name", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="emergency_full_name" id="full_name_txt" placeholder="<?= __("Enter the full name") ?>" value="<?= nvl(@$post['emergency_full_name'], $model->col('user_emergency_contact:full_name')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="primary_phone_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("primary_phone", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="emergency_primary_phone" id="primary_phone_txt" placeholder="<?= __("Enter the primary phone") ?>" value="<?= nvl(@$post['emergency_primary_phone'], $model->col('user_emergency_contact:primary_phone')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="alternative_phone_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("alternative_phone", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="emergency_alternative_phone" id="alternative_phone_txt" placeholder="<?= __("Enter the alternative phone") ?>" value="<?= nvl(@$post['emergency_alternative_phone'], $model->col('user_emergency_contact:alternative_phone')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("email", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="emergency_email" id="email_txt" placeholder="<?= __("Enter the email") ?>" value="<?= nvl(@$post['emergency_email'], $model->col('user_emergency_contact:email')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="skype_id_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __("Skype ID") ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="emergency_skype_id" id="skype_id_txt" placeholder="<?= __("Enter the skype ID") ?>" value="<?= nvl(@$post['emergency_skype_id'], $model->col('user_emergency_contact:skype_id')) ?>" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <h3><?= __("Address Information") ?></h3>
+                <div class="form-group">
+                    <label for="street_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("street", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="address_street" id="street_txt" placeholder="<?= __("Enter the street") ?>" value="<?= nvl(@$post['address_street'], $model->col('user_address:street')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="city_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("city", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="address_city" id="city_txt" placeholder="<?= __("Enter the city") ?>" value="<?= nvl(@$post['address_city'], $model->col('user_address:city')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="state_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("state", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="address_state" id="state_txt" placeholder="<?= __("Enter the state / province") ?>" value="<?= nvl(@$post['address_state'], $model->col('user_address:state')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="zip_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("zip", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="address_zip" id="zip_txt" placeholder="<?= __("Enter the ZIP") ?>" value="<?= nvl(@$post['address_zip'], $model->col('user_address:zip')) ?>" class="form-control" />
+                    </div>
+                </div>
+
+
+
+                <h3><?= __("Mission Information") ?></h3>
+                <div class="form-group">
+                    <label for="title_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("title", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="mission_title" id="title_txt" placeholder="<?= __("Enter the title") ?>" value="<?= nvl(@$post['mission_title'], $model->col('user_mission:title')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="department_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("department", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="mission_department" id="department_txt" placeholder="<?= __("Enter the department") ?>" value="<?= nvl(@$post['mission_department'], $model->col('user_mission:department')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="supervisor_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("supervisor", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="mission_supervisor" id="supervisor_txt" placeholder="<?= __("Enter the supervisor") ?>" value="<?= nvl(@$post['mission_supervisor'], $model->col('user_mission:supervisor')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="employee_id_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("employee_id", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="mission_employee_id" id="employee_id_txt" placeholder="<?= __("Enter the employee ID") ?>" value="<?= nvl(@$post['mission_employee_id'], $model->col('user_mission:employee_id')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="work_location_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("work_location", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="mission_work_location" id="work_location_txt" placeholder="<?= __("Enter the work location") ?>" value="<?= nvl(@$post['mission_work_location'], $model->col('user_mission:work_location')) ?>" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="start_date_txt" class="col-sm-6 col-md-5 col-lg-4 control-label"><?= __(pass("start_date", "labelize,strtolower,ucfirst")) ?></label>
+                    <div class="col-sm-6 col-md-7 col-lg-8">
+                        <input type="text" name="mission_start_date" id="start_date_txt" placeholder="<?= __("Enter the start date") ?>" value="<?= nvl(@$post['mission_start_date'], $model->col('user_mission:start_date')) ?>" class="form-control datepicker" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="text-right">
+            <hr />
+            <a class="btn btn-default pull-left" href="<?= base_url($return_url) ?>"><i class="glyphicon glyphicon-remove"></i> <?= __("Cancel") ?></a>&nbsp;
+            <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-floppy-disk"></i> <?= __("Save") ?></button>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function() {
+
+        $('input.datepicker').datepicker()
+
+        $("#edit-profile-form input").keypress(function() {
+            $(this).parents('.form-group').removeClass('has-error').find('.error').hide();
+        });
+
+        $("#edit-profile-form").submit(function() {
+            $(this).find('.error').hide();
+            if (!$("#first_name_txt").val()) {
+                $(".first_name_txt.required").show();
+                $("#first_name_txt").focus().parents(".form-group").addClass("has-error");
+                return false;
+            }
+            if (!$("#last_name_txt").val()) {
+                $(".last_name_txt.required").show();
+                $("#last_name_txt").focus().parents(".form-group").addClass("has-error");
+                return false;
+            }
+            return true;
+        });
+    });
+</script>
