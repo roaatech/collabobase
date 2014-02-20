@@ -24,3 +24,7 @@ FIRST USE
 You can first login by the admin using the username: admin and password admin.
 It is highly recommended to change them after the first installation.
 From the admin menu, you can access the users section, where you can create new users and assign them roles.
+
+WHAT IS INCLUDED
+----------------------
+This application uses CodeIgniter v2.1.4 (modified), NotORM (modified), Twitter Bootstrap v3 (modified), Arabic Twitter Bootstrap v3 (modified), Summernote WYSIWYG web editor, and Selectize bootstrap/jquery plugins.
