@@ -10,6 +10,7 @@ REQUIREMENTS
 ----------------------
 1. Apache v2.+, rewrite module is enabled.
 2. MySQL
+3. PHP 5.4+
 
 INSTALL
 ----------------------
