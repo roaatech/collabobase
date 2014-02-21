@@ -826,6 +826,24 @@ pre code {
   }
 }
 
+@media (min-width: 1440px){
+    .container{
+        width: 1360px;
+    }
+}
+
+@media (min-width: 1600px){
+    .container{
+        width: 1440px;
+    }
+}
+
+@media (min-width: 1920px){
+    .container{
+        width:1600px;
+    }
+}
+
 .row {
   margin-right: -15px;
   margin-left: -15px;

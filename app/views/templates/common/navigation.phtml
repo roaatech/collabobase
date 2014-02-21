@@ -1,6 +1,12 @@
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
         <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
             <?php if ($this->currentUser()): ?>
                 <a class="navbar-brand" href="<?= base_url('') ?>"><?= __("Welcome") ?> <strong><?= $this->currentUser()->presenter() ?></strong></a>
             <?php else: ?>
@@ -10,7 +16,7 @@
         <div id="main-navigation" class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <?php if (!$controller->session->userdata('current_user')): ?>
-                <li class="<?= @$active_tab == 'login' ? 'active' : '' ?>"><a href="<?= base_url("account/login") ?>"><?= __("Login") ?></a></li>
+                    <li class="<?= @$active_tab == 'login' ? 'active' : '' ?>"><a href="<?= base_url("account/login") ?>"><?= __("Login") ?></a></li>
                 <?php else: ?>
                     <li class="<?= @$active_tab == 'messages' ? 'active' : '' ?>"><a class='messages-handler has-count-badge' title='<?= __("Messages") ?>' href="<?= base_url("messages") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-envelope"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-envelope"></span><span style="display:inline-block;"><span class="pull-right badge" style="margin-<?= __("_main_side") ?>:10px;"><?= $new_chats_count ?></span>&nbsp; <?= __("Messages") ?></span></span></a></li>
                     <li class="<?= @$active_tab == 'profile' ? 'active' : '' ?>"><a class='' title='<?= __("Your Account") ?>' href="<?= base_url("profile") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-user"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-user"></span>&nbsp; <?= __("Account") ?></span></a></li>
