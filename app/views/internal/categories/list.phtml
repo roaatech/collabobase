@@ -20,7 +20,7 @@ function echoCategories($categories, $key = "root") {
                         <span class="pull-right state-value hidden-sm hidden-xs" data-toggle="tooltip" title="<?= __("Number of posts") ?>"><?= $category['posts'] ?></span>
                         <!--<span class="pull-right state-value hidden-sm hidden-xs" data-toggle="tooltip" title="Number of files"><?= $category['files'] ?></span>-->
                         <span class="pull-right state-value hidden-sm hidden-xs">
-                            <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Add sub category") ?>)" onclick="editCategory(<?= $category['id'] ?>);"><i class="glyphicon glyphicon-plus"></i></a>
+                            <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Add sub category") ?>" onclick="editCategory(<?= $category['id'] ?>);"><i class="glyphicon glyphicon-plus"></i></a>
                             <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Edit the category") ?>" onclick="editCategory('<?= $category['parent'] ?>', '<?= $category['id'] ?>', '<?= $category['name'] ?>');"><i class="glyphicon glyphicon-edit"></i></a>
                             <a class="category-control" href="#" data-toggle="tooltip" title="<?= __("Delete the category") ?>" onclick="deleteCategory('<?= $category['id'] ?>', '<?= $category['name'] ?>');"><i class="glyphicon glyphicon-remove"></i></a>
                             <a class="category-control"><i class="glyphicon"></i></a>
@@ -37,9 +37,9 @@ function echoCategories($categories, $key = "root") {
                         <?php endif; ?>
                         <h4 class="panel-title"><?= $category['name'] ?></h4>
                         <div class="visible-sm visible-xs" style="clear: both;">
-            <!--                            <span class="text-muted">
-                                <? = __("Files ") ?><? = $category['files'] ?>
-                            </span>,-->
+                            <!-- <span class="text-muted"> -->
+                            <!--? = __("Files ") ?--><!--? = $category['files'] ?-->
+                            <!-- </span>,-->
                             <span class="text-muted">
                                 <?= __("Posts ") ?><?= $category['posts'] ?>
                             </span>,

@@ -1,5 +1,5 @@
-CREATE DATABASE  IF NOT EXISTS `t4f` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `t4f`;
+-- CREATE DATABASE  IF NOT EXISTS `t4f` /*!40100 DEFAULT CHARACTER SET utf8 */;
+-- USE `t4f`;
 -- MySQL dump 10.13  Distrib 5.6.13, for Win32 (x86)
 --
 -- Host: 127.0.0.1    Database: t4f
@@ -738,6 +738,8 @@ UNLOCK TABLES;
 --
 -- Final view structure for view `category`
 --
+-- ALGORITHM=UNDEFINED
+-- /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 
 /*!50001 DROP TABLE IF EXISTS `category`*/;
 /*!50001 DROP VIEW IF EXISTS `category`*/;
@@ -747,9 +749,7 @@ UNLOCK TABLES;
 /*!50001 SET character_set_client      = utf8 */;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `category` AS select `tag`.`id` AS `id`,`tag`.`name` AS `name`,`tag`.`tag_id` AS `parent` from `tag` where `tag`.`tag_type_id` in (select `tag_type`.`id` from `tag_type` where (`tag_type`.`name` = 'category')) */;
+/*!50001 CREATE VIEW `category` AS select `tag`.`id` AS `id`,`tag`.`name` AS `name`,`tag`.`tag_id` AS `parent` from `tag` where `tag`.`tag_type_id` in (select `tag_type`.`id` from `tag_type` where (`tag_type`.`name` = 'category')) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -766,9 +766,7 @@ UNLOCK TABLES;
 /*!50001 SET character_set_client      = utf8 */;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `category_states` AS select `category`.`id` AS `id`,`category`.`name` AS `name`,`category`.`parent` AS `parent`,ifnull(`posts`.`count`,0) AS `posts` from (`category` left join `tag_posts` `posts` on((`category`.`id` = `posts`.`tag_id`))) */;
+/*!50001 CREATE VIEW `category_states` AS select `category`.`id` AS `id`,`category`.`name` AS `name`,`category`.`parent` AS `parent`,ifnull(`posts`.`count`,0) AS `posts` from (`category` left join `tag_posts` `posts` on((`category`.`id` = `posts`.`tag_id`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -785,9 +783,7 @@ UNLOCK TABLES;
 /*!50001 SET character_set_client      = utf8 */;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `file_category` AS select `post`.`file_id` AS `file_id`,ifnull(`pt`.`tag_id`,NULL) AS `category_id` from (`post` left join `post_tag` `pt` on((`pt`.`post_id` = `post`.`id`))) where ((`pt`.`tag_id` in (select `category`.`id` from `category`) or isnull(`pt`.`tag_id`)) and (`post`.`file_id` is not null)) */;
+/*!50001 CREATE VIEW `file_category` AS select `post`.`file_id` AS `file_id`,ifnull(`pt`.`tag_id`,NULL) AS `category_id` from (`post` left join `post_tag` `pt` on((`pt`.`post_id` = `post`.`id`))) where ((`pt`.`tag_id` in (select `category`.`id` from `category`) or isnull(`pt`.`tag_id`)) and (`post`.`file_id` is not null)) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -804,9 +800,7 @@ UNLOCK TABLES;
 /*!50001 SET character_set_client      = utf8 */;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `post_category` AS select `post`.`id` AS `post_id`,ifnull(`pt`.`tag_id`,NULL) AS `category_id` from (`post` left join `post_tag` `pt` on((`pt`.`post_id` = `post`.`id`))) where ((`pt`.`tag_id` in (select `category`.`id` from `category`) or isnull(`pt`.`tag_id`)) and isnull(`post`.`file_id`)) */;
+/*!50001 CREATE VIEW `post_category` AS select `post`.`id` AS `post_id`,ifnull(`pt`.`tag_id`,NULL) AS `category_id` from (`post` left join `post_tag` `pt` on((`pt`.`post_id` = `post`.`id`))) where ((`pt`.`tag_id` in (select `category`.`id` from `category`) or isnull(`pt`.`tag_id`)) and isnull(`post`.`file_id`)) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -823,9 +817,7 @@ UNLOCK TABLES;
 /*!50001 SET character_set_client      = utf8 */;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `tag_posts` AS select `post_tag`.`tag_id` AS `tag_id`,count(0) AS `count` from `post_tag` group by `post_tag`.`tag_id` */;
+/*!50001 CREATE VIEW `tag_posts` AS select `post_tag`.`tag_id` AS `tag_id`,count(0) AS `count` from `post_tag` group by `post_tag`.`tag_id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

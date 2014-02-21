@@ -11,7 +11,7 @@ function __($line, $id = '') {
     }
     if (!$result) {
         $result = $line;
-        addLangLine($line);
+        //addLangLine($line);
     }
     $store[$line] = $result;
     return $result;
