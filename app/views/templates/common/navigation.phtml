@@ -18,9 +18,24 @@
                 <?php if (!$controller->session->userdata('current_user')): ?>
                     <li class="<?= @$active_tab == 'login' ? 'active' : '' ?>"><a href="<?= base_url("account/login") ?>"><?= __("Login") ?></a></li>
                 <?php else: ?>
-                    <li class="<?= @$active_tab == 'messages' ? 'active' : '' ?>"><a class='messages-handler has-count-badge' title='<?= __("Messages") ?>' href="<?= base_url("messages") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-envelope"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-envelope"></span><span style="display:inline-block;"><span class="pull-right badge" style="margin-<?= __("_main_side") ?>:10px;"><?= $new_chats_count ?></span>&nbsp; <?= __("Messages") ?></span></span></a></li>
-                    <li class="<?= @$active_tab == 'profile' ? 'active' : '' ?>"><a class='' title='<?= __("Your Account") ?>' href="<?= base_url("profile") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-user"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-user"></span>&nbsp; <?= __("Account") ?></span></a></li>
-                    <li class="<?= @$active_tab == 'logout' ? 'active' : '' ?>"><a class='' title='<?= __("Logout") ?>' href="<?= base_url("account/logout") ?>"><span class="hidden-xs hidden-lg glyphicon glyphicon-log-out"></span><span class='visible-xs visible-lg'><span class="pull-left glyphicon glyphicon-off"></span>&nbsp; <?= __("Logout") ?></span></a></li>
+                    <li class="<?= @$active_tab == 'messages' ? 'active' : '' ?>">
+                        <a class='messages-handler has-count-badge' title='<?= __("Messages") ?>' href="<?= base_url("messages") ?>">
+                            <span class="hidden-xs hidden-lg glyphicon glyphicon-envelope"></span>
+                            <span class='hidden-sm hidden-md'><span class="pull-left glyphicon glyphicon-envelope"></span><span style="display:inline-block;"><span class="pull-right badge" style="margin-<?= __("_main_side") ?>:10px;"><?= $new_chats_count ?></span>&nbsp; <?= __("Messages") ?></span></span>
+                        </a>
+                    </li>
+                    <li class="<?= @$active_tab == 'profile' ? 'active' : '' ?>">
+                        <a class='' title='<?= __("Your Account") ?>' href="<?= base_url("profile") ?>">
+                            <span class="hidden-xs hidden-lg glyphicon glyphicon-user"></span>
+                            <span class='hidden-sm hidden-md'><span class="pull-left glyphicon glyphicon-user"></span>&nbsp; <?= __("Account") ?></span>
+                        </a>
+                    </li>
+                    <li class="<?= @$active_tab == 'logout' ? 'active' : '' ?>">
+                        <a class='' title='<?= __("Logout") ?>' href="<?= base_url("account/logout") ?>">
+                            <span class="hidden-xs hidden-lg glyphicon glyphicon-log-out"></span>
+                            <span class="hidden-sm hidden-md"><span class="pull-left glyphicon glyphicon-off"></span>&nbsp; <?= __("Logout") ?></span>
+                        </a>
+                    </li>
                     <li role="presentation" class="visible-xs divider"></li>
                     <!--<li class="navbar-text">Welcome <strong><?= $this->currentUser()->presenter() ?></strong></li>-->
 
@@ -33,7 +48,7 @@
                     <li class="<?= @$active_tab == 'contact_us' ? 'active' : '' ?>"><a href="<?= base_url("contact_us") ?>"><?= __("Contact Us") ?></a></li>
                 <?php else: ?>
                     <li class="<?= @$active_tab == 'landing' ? 'active' : '' ?>">
-                        <a href="<?= base_url("landing") ?>" class="visible-xs"><i class="glyphicon glyphicon-home"></i>&nbsp; Your Home</a>
+                        <a href="<?= base_url("landing") ?>" class="visible-xs"><i class="glyphicon glyphicon-home"></i>&nbsp; <?= __("Your Home") ?></a>
                         <a href="<?= base_url("landing") ?>" class="hidden-xs"><i class="glyphicon glyphicon-home"></i></a>
                     </li>
                     <!--<li class="<?= @$active_tab == 'discussion' ? 'active' : '' ?>"><a href="<?= base_url("posts") ?>">Discussions</a></li>-->
@@ -64,7 +79,7 @@
                         <li class="<?= @$active_tab == 'admin' ? 'active' : '' ?>">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                                 <!--<i class="glyphicon glyphicon-wrench"></i>--> 
-                                <?= __("Admin") ?> <span class="caret"></span>
+                                <?= __("Admin /**Administration Menu**/") ?> <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu" role="menu">
                                 <li class="<?= @$active_tab == 'users' ? 'active' : '' ?>"><a href="<?= base_url("users") ?>"><i class="glyphicon glyphicon-user"></i> <?= __("Users") ?></a></li>

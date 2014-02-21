@@ -47,7 +47,7 @@ function echoCategories($categories, $key = "root") {
                                 <?= __("Sub categories ") ?><?= $subs ?>
                             </span>
                         </div>
-                        <div class="visible-sm visible-xs">
+                        <div class="hidden-lg hidden-md">
                             <a href="#" data-toggle="tooltip" title="<?= __("Add sub category") ?>" onclick="editCategory(<?= $category['id'] ?>);"><?= __("Create sub-category") ?></a> - 
                             <a href="#" data-toggle="tooltip" title="<?= __("Edit the category") ?>" onclick="editCategory('<?= $category['parent'] ?>', '<?= $category['id'] ?>', '<?= $category['name'] ?>');"><?= __("Edit") ?></a> - 
                             <a href="#" data-toggle="tooltip" title="<?= __("Delete the category") ?>" onclick="deleteCategory('<?= $category['id'] ?>', '<?= $category['name'] ?>');"><?= __("Delete") ?></a>
@@ -280,14 +280,15 @@ function echoList($categories, $key = "root") {
     function deleteCategory(id, name) {
         $("#delete-category-form .delete-category-id").val(id);
         $.showdal({
-            "body": "You are going to to completely remove the category '" + name + "'?<br /><br /><div class='text-danger'><strong>Warning!</strong> Deleting the category will make all its sub-categories, posts, and files follow its parent category, or uncategorized if it is not under a parent category!</div><br />Are you sure you want to continue?",
-            "title": "Delete category",
+            "body": "<?= __("You are going to to completely remove the category") ?> '" + name + "'.<br /><br /><div class='text-danger'><strong><?= __("Warning") ?>!</strong> <?= __("Deleting the category will make all its sub-categories, posts, and files follow its parent category, or uncategorized if it is not under a parent category!") ?></div><br /><?= __("Are you sure you want to continue?") ?>",
+            "title": "<?= __("Delete category") ?>",
             "buttons": {
                 "Cancel": {
                     "class": "btn btn-default pull-left",
                     "attributes": {
                         "data-dismiss": "modal"
                     },
+                    title: "<?= __("Cancel") ?>"
                 },
                 "Delete": {
                     "class": "btn btn-primary",
@@ -295,6 +296,7 @@ function echoList($categories, $key = "root") {
                         $("#delete-category-form").submit();
                         $(this).showdal("hide");
                     },
+                    title: "<?= __("Delete") ?>"
                 }
             }
         });
@@ -306,18 +308,19 @@ function echoList($categories, $key = "root") {
         fw.temporary.moveId = categoryId;
         fw.temporary.moveName = categoryName;
         fw.temporary.moveParent = parentId == 1 ? null : parentId;
-        message = "You are going to to move the category '" + categoryName + "' and all its contents into category '" + parentName + "'!<br /><br />Are you sure you want to continue?";
+        message = "<?= __("You are going to to move the category") ?> '" + categoryName + "' <?= __("and all its contents into category") ?> '" + parentName + "'!<br /><br /><?= __("Are you sure you want to continue?") ?>";
         if (parentId == '1')
-            message = "You are going to to convert the category '" + categoryName + "' to a root category!<br /><br />Are you sure you want to continue?";
+            message = "<?= __("You are going to to convert the category") ?> '" + categoryName + "' <?= __("to a root category!") ?><br /><br /><?= __("Are you sure you want to continue?") ?>";
         $.showdal({
             "body": message,
-            "title": "Move category",
+            "title": "<?= __("Move category") ?>",
             "buttons": {
                 "Cancel": {
                     "class": "btn btn-default pull-left",
                     "attributes": {
                         "data-dismiss": "modal"
                     },
+                    title: "<?= __("Cancel") ?>"
                 },
                 "Move": {
                     "class": "btn btn-primary",
@@ -325,6 +328,7 @@ function echoList($categories, $key = "root") {
                         submitCategory(fw.temporary.moveId, fw.temporary.moveName, fw.temporary.moveParent);
                         $(this).showdal("hide");
                     },
+                    title: "<?= __("Move") ?>"
                 }
             }
         });

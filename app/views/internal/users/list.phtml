@@ -33,12 +33,13 @@
                 <tbody>
                     <?php $i = ($current_page - 1) * $records_per_page + 1; ?>
                     <?php foreach ($users as $user): ?>
+                        <?php /* @var $user UserModel */ ?>
                         <tr>
                             <td><?= $i++ ?></td>
                             <td><?= $user['username'] ?></td>
                             <td class="hidden-xs"><?= $user['first_name'] . " " . $user['last_name'] ?></td>
-                            <td><?= pass($user['role'], 'csv_ucfirst') ?></td>
-                            <td class="hidden-xs"><?= $user->user_information['status'] ?></td>
+                            <td><?= $user->presenter()->roleList() //pass($user['role'], 'csv_ucfirst')   ?></td>
+                            <td class="hidden-xs"><?= __($user->user_information['status']) ?></td>
                             <td class="hidden-xs hidden-sm hidden-md"><?= $this->currentUser()->dateTime($user->user_information['creation_date'], 'Y/m/d') ?></td>
                             <td><?= $user->post("post_id is null")->count() ?></td>
                             <td class="hidden-xs"><?= $user->file()->count() ?></td>

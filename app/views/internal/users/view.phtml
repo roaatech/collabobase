@@ -1,5 +1,6 @@
 <?php
 /* @var $filep UserFilePresenter */
+/* @var $model UserModel */
 ?>
 <div class="container">
     <div class="page-header">
@@ -20,25 +21,24 @@
     <?php endif; ?>
     <div class="">
         <div class="pull-right hidden-xs">
-            <?php if ($model->isAdmin() || $model->isUser()): ?>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                        <?= __("Actions") ?> <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu pull-right" role="menu">
-                        <li><a href="<?= base_url($edit_url) ?>"><?= __("Edit") ?></a></li>
-                        <li><a href="<?= base_url($change_password_url) ?>"><?= __("Change Password") ?></a></li>
-                        <?php if (!$is_me): ?>
-                            <?php if ($model->col('user_information:status') == 'active'): ?>
-                                <li><a href="#" onclick="suspendDialog();"><?= __("Suspend") ?></a></li>
-                            <?php else: ?>
-                                <li><a href="#" onclick="activateDialog();"><?= __("Activate") ?></a></li>
-                            <?php endif; ?>
-                            <li><a href="#" onclick="deleteUserDialog();"><?= __("Delete") ?></a></li>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <?= __("Actions") ?> <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right" role="menu">
+                    <li><a href="<?= base_url($edit_url) ?>"><?= __("Edit") ?></a></li>
+                    <li><a href="<?= base_url($change_password_url) ?>"><?= __("Change Password") ?></a></li>
+                    <?php if (!$is_me): ?>
+                        <?php if ($model->col('user_information:status') == 'active'): ?>
+                            <li><a href="#" onclick="suspendDialog();"><?= __("Suspend") ?></a></li>
+                        <?php else: ?>
+                            <li><a href="#" onclick="activateDialog();"><?= __("Activate") ?></a></li>
                         <?php endif; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
+                        <li><a href="#" onclick="deleteUserDialog();"><?= __("Delete") ?></a></li>
+                        <li><a href="#" onclick="showRolesDialog();"><?= __("Manage Roles") ?></a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
         </div>
         <div class="visible-xs">
             <div class="btn-group width-100">
@@ -418,6 +418,50 @@
     <form id="status-user-form" method="post" action="<?= $model->col("user_information:status") == "active" ? base_url("users/do_suspend") : base_url("users/do_activate") ?>" class="hide">
         <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
     </form>
+    <div id="user-roles-form" class="hide">
+        <form method="post" action="<?= base_url("users/set_roles") ?>" class="form" title="<?= __("User Roles") ?>">
+            <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="admin" value="admin" <?= $model->isAdmin() ? "checked='checked'" : "" ?>> <?= __("Admin /**in user roles management**/") ?>
+                </label>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="supervisor" value="supervisor" <?= $model->isSupervisor() ? "checked='checked'" : "" ?>> <?= __("Supervisor /**in user roles management**/") ?>
+                </label>
+            </div>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="user" value="user" <?= $model->isUser() ? "checked='checked'" : "" ?>> <?= __("User /**in user roles management**/") ?>
+                </label>
+            </div>
+        </form>
+    </div>
+    <script type="text/javascript">
+        function showRolesDialog() {
+            $("#user-roles-form form").clone().showdal({
+                "buttons": {
+                    Save: {
+                        "action": function() {
+                            $(this).showdal('close');
+                            $(this).closest(".modal").find("form").submit();
+                        },
+                        "title": "<?= __("Save") ?>",
+                        "class": "btn-primary float-left",
+                        "attributes": {},
+                    },
+                    "Cancel": {
+                        "attributes": {
+                            "data-dismiss": "modal"
+                        },
+                        "class": "btn-default",
+                        title: "<?= __("Cancel") ?>"
+                    },
+                },
+            });
+        }
+    </script>
     <?php if ($model->col("user_information:status") == "active"): ?>
         <script type="text/javascript">
             function suspendDialog() {

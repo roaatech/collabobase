@@ -48,6 +48,7 @@ $route['landing'] = 'landing/Index';
 $route['landing/(:any)'] = 'landing/$1';
 $route['pages/(:any)'] = 'pages/$1';
 $route['users'] = 'users/Index';
+$route['users/set_roles'] = 'users/setRoles';
 $route['users/(:num)'] = 'users/Index/$1';
 $route['users/(:any)'] = 'users/$1';
 $route['profile'] = 'profile/Index';

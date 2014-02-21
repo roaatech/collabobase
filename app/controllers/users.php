@@ -441,4 +441,45 @@ class Users extends MY_Controller {
         $this->redirectWithOperationMessage("users", "The user has been deleted!");
     }
 
+    public function setRoles() {
+        $id = $this->input->post('user_id', true);
+        $user = $this->input->post('user', true);
+        $supervisor = $this->input->post('supervisor', true);
+        $admin = $this->input->post('admin', true);
+
+        $userModel = UserQuery::getInstance()->findById($id);
+        if (!$userModel || !$this->currentUser()->isAdmin()) {
+            return $this->redirectWithOperationMessage("users", "Not a user or insufficient privileges", 1);
+        }
+        
+        if(!$user && !$supervisor && !$admin){
+            return $this->redirectWithOperationMessage("users/view/$id", "Can not revoke all roles from the user!", 1);
+        }
+
+        $res = true;
+        if ($user) {
+            $res = $res && $userModel->addRole(UserModel::ROLE_USER);
+        } else {
+            $res = $res && $userModel->removeRole(UserModel::ROLE_USER);
+        }
+
+        if ($supervisor) {
+            $res = $res && $userModel->addRole(UserModel::ROLE_SUPERVISOR);
+        } else {
+            $res = $res && $userModel->removeRole(UserModel::ROLE_SUPERVISOR);
+        }
+
+        if ($admin) {
+            $res = $res && $userModel->addRole(UserModel::ROLE_ADMIN);
+        } else {
+            $res = $res && $userModel->removeRole(UserModel::ROLE_ADMIN);
+        }
+
+        if ($res) {
+            return $this->redirectWithOperationMessage("users/view/$id", "User roles has been set successfully!");
+        } else {
+            return $this->redirectWithOperationMessage("users/view/$id", "Can not set user roles!", 1);
+        }
+    }
+
 }

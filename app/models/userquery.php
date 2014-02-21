@@ -353,7 +353,7 @@ class UserPresenter extends Presenter {
 
     function roleList() {
         return implode(", ", array_map(function($v) {
-                    return ucfirst(strtolower($v));
+                    return __(ucfirst(strtolower($v)));
                 }, explode(",", $this->model->col('role'))));
     }
 
