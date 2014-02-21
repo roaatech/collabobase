@@ -402,3 +402,4 @@ $lang["User /**in user roles management**/"] = "مستخدم";
 $lang["User roles has been set successfully!"]="تم تعيين المسؤوليات الجديدة للمستخدم!";
 $lang["Can not revoke all roles from the user!"]="لا يمكن حذف جميع المسؤوليات من المستخدم!";
 $lang["Admin /**Administration Menu**/"]="الإدارة";
+$lang["Name the file"]="أدخل اسم الملف";

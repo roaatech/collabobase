@@ -214,3 +214,8 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 /nbproject/private/
+AskFtpSiteDeployer.xml
+app/helpers/my_language_helper.php
+app/config/config.php
+.htaccess
+nbproject/project.properties

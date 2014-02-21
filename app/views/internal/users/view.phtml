@@ -282,15 +282,15 @@
                                 <input type="hidden" name="user_id" value="<?= $model->col('id') ?>" />
                                 <div class="form-group">
                                     <label class="" for="fileFle"><?= __("File") ?></label>
-                                    <input type="file" class="form-control required" required="required" id="fileFle" name="file" placeholder="Choose a file" />
+                                    <input type="file" class="form-control required" required="required" id="fileFle" name="file" placeholder="<?= __("Choose a file") ?>" />
                                 </div>
                                 <div class="form-group">
                                     <label class="" for="titleTxt"><?= __("Title") ?></label>
-                                    <input type="text" class="form-control required" required="required" id="titleTxt" name="title" placeholder="Name the file" value="<?= $this->session->flashdata('file_upload_title') ?>" />
+                                    <input type="text" class="form-control required" required="required" id="titleTxt" name="title" placeholder="<?= __("Name the file") ?>" value="<?= $this->session->flashdata('file_upload_title') ?>" />
                                 </div>
                                 <div class="form-group">
                                     <label class="" for="descriptionTxt"><?= __("Description") ?></label>
-                                    <textarea name="description" id="descriptionTxt" class="form-control" placeholder="Description"><?= $this->session->flashdata('file_upload_description') ?></textarea>
+                                    <textarea name="description" id="descriptionTxt" class="form-control" placeholder="<?= __("Description") ?>"><?= $this->session->flashdata('file_upload_description') ?></textarea>
                                 </div>
                                 <div class="text-right">
                                     <button role="button" type="submit" name="upload" class="btn btn-primary"><?= __("Upload") ?></button>
