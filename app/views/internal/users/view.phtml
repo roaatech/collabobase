@@ -42,14 +42,16 @@
         </div>
         <div class="visible-xs">
             <div class="btn-group width-100">
-                <button style="width:25%;" type="button" class="btn btn-default" onclick="window.location = '<?= base_url($edit_url) ?>';"><?= __("Edit") ?></button>
-                <button style="width:50%;" type="button" class="btn btn-default" onclick="window.location = '<?= base_url($change_password_url) ?>';"><?= __("Change Password") ?></button>
+                <button style="width:15%;" type="button" class="btn btn-default" onclick="window.location = '<?= base_url($edit_url) ?>';"><?= __("Edit") ?></button>
+                <button style="width:25%;" type="button" class="btn btn-default" onclick="window.location = '<?= base_url($change_password_url) ?>';"><?= __("Change Password") ?></button>
                 <?php if (!$is_me): ?>
                     <?php if ($model->col('user_information:status') == 'active'): ?>
-                        <button style="width:25%;" type="button" class="btn btn-default" onclick="suspendDialog();"><?= __("Suspend") ?></button>
+                        <button style="width:20%;" type="button" class="btn btn-default" onclick="suspendDialog();"><?= __("Suspend") ?></button>
                     <?php else: ?>
-                        <button style="width:25%;" type="button" class="btn btn-default" onclick="activateDialog();"><?= __("Activate") ?></button>
+                        <button style="width:20%;" type="button" class="btn btn-default" onclick="activateDialog();"><?= __("Activate") ?></button>
                     <?php endif; ?>
+                    <button style="width:20%;" class="btn btn-default" href="#" onclick="showRolesDialog();"><?= __("Manage Roles") ?></button>
+                    <button style="width:20%;" class="btn btn-danger" href="#" onclick="deleteUserDialog();"><?= __("Delete") ?></button>
                 <?php endif; ?>
             </div>
             &nbsp;
