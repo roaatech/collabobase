@@ -19,7 +19,7 @@ if (!defined('BASEPATH'))
  */
 
 //$config['base_url'] = 'http://192.168.0.51:8088/github/collabobase/';
-$config['base_url'] = substr($_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'], 0, -9);
+$config['base_url'] = substr((@$_SERVER['HTTPS'] ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'], 0, -9);
 
 /*
   |--------------------------------------------------------------------------
