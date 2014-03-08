@@ -17,7 +17,9 @@ if (!defined('BASEPATH'))
   | path to your installation.
   |
  */
-$config['base_url'] = 'http://localhost:8088/www/t4f/';
+
+//$config['base_url'] = 'http://192.168.0.51:8088/github/collabobase/';
+$config['base_url'] = substr($_SERVER['REQUEST_SCHEME'] . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'], 0, -9);
 
 /*
   |--------------------------------------------------------------------------
@@ -29,7 +31,7 @@ $config['base_url'] = 'http://localhost:8088/www/t4f/';
   | variable so that it is blank.
   |
  */
-$config['index_page'] = '';
+$config['index_page'] = 'index.php';
 
 /*
   |--------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 class Files extends MY_Controller {
 
     public function __construct() {
+
         parent::__construct();
 
         $this->protectedArea();
@@ -170,10 +171,9 @@ class Files extends MY_Controller {
                 $categoryModel = null;
             }
 
-
             //configuring the upload
             $config['upload_path'] = __DIR__ . DIRECTORY_SEPARATOR . '../../assets/uploads/';
-            $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|txt|tif|tiff|xls|xlsx|rtf';
+            $config['allowed_types'] = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "allowed_types.txt");
             $config['max_size'] = '2048';
             $config['max_width'] = '0';
             $config['max_height'] = '0';
@@ -183,7 +183,7 @@ class Files extends MY_Controller {
             $this->load->library('upload', $config);
             if (!$this->upload->do_upload('file')) {
                 $errors = $this->upload->display_errors('', '');
-                throw new Exception($errors, 1);
+                throw new Exception($errors, 2);
             }
 
             //getting saving uploaded file result
@@ -201,7 +201,7 @@ class Files extends MY_Controller {
 
             $this->redirectWithOperationMessage("files/view/{$fileModel->id}", "The file has been successfully uploaded!");
         } catch (Exception $e) {
-            var_dump($e);
+            $this->redirectWithOperationMessage("/files/new", $e->getMessage(), 1);
         }
     }
 
@@ -309,12 +309,12 @@ class Files extends MY_Controller {
             }
 
             if ($fileModel->version >= $version) {
-                throw new Exception("Version should be larger than the current version {$fileModel->version}", 1);
+                throw new Exception("Version should be larger than the current version {$fileModel->version}", 2);
             }
 
             //configuring the upload
             $config['upload_path'] = __DIR__ . DIRECTORY_SEPARATOR . '../../assets/uploads/';
-            $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|txt|tif|tiff|xls|xlsx|rtf';
+            $config['allowed_types'] = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "allowed_types.txt");
             $config['max_size'] = '2048';
             $config['max_width'] = '0';
             $config['max_height'] = '0';
@@ -324,7 +324,7 @@ class Files extends MY_Controller {
             $this->load->library('upload', $config);
             if (!$this->upload->do_upload('file')) {
                 $errors = $this->upload->display_errors('', '');
-                throw new Exception($errors, 1);
+                throw new Exception($errors, 2);
             }
 
             //getting saving uploaded file result
@@ -333,28 +333,16 @@ class Files extends MY_Controller {
             //adding file version
             $fileVersionModel = $fileModel->insertVersion($uploadData['file_name'], $uploadData['orig_name'], $uploadData['file_type'], $this->currentUser()->model(), $version, $uploadData['file_size'], $title, $description);
             if (!$fileVersionModel || is_string($fileVersionModel)) {
-                throw new Exception("Error in adding version. $fileVersionModel", 1);
+                throw new Exception("Error in adding version. $fileVersionModel", 3);
             }
 
             return $this->redirectWithOperationMessage("files/view/{$fileModel->id}", "The version has been successfully uploaded!");
-
-//            array (size=14)
-//            'file_name' => string 'f636d23fe412acb1db3d7c1567b3d1d8.pdf' (length = 36)
-//            'file_type' => string 'application/pdf' (length = 15)
-//            'file_path' => string 'D:/www/t4f/assets/uploads/' (length = 26)
-//            'full_path' => string 'D:/www/t4f/assets/uploads/f636d23fe412acb1db3d7c1567b3d1d8.pdf' (length = 62)
-//            'raw_name' => string 'f636d23fe412acb1db3d7c1567b3d1d8' (length = 32)
-//            'orig_name' => string '_.pdf' (length = 5)
-//            'client_name' => string '?????? ????.pdf' (length = 15)
-//            'file_ext' => string '.pdf' (length = 4)
-//            'file_size' => float 124
-//            'is_image' => boolean false
-//            'image_width' => string '' (length = 0)
-//            'image_height' => string '' (length = 0)
-//            'image_type' => string '' (length = 0)
-//            'image_size_str' => string '' (length = 0)
         } catch (Exception $e) {
-            var_dump($e);
+            if ($e->getCode() == 1) {
+                $this->redirectWithOperationMessage("files", $e->getMessage(), $e->getCode());
+            } else {
+                $this->redirectWithOperationMessage("files/new_version/$id", $e->getMessage(), $e->getCode());
+            }
         }
     }
 

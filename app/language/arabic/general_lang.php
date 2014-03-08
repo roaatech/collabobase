@@ -409,3 +409,4 @@ $lang["All categories/*list option*/"]="الجميع";
 $lang["hour"]="ساعة";
 $lang["minute"]="دقيقة";
 $lang["No files are matching "]="لا توجد ملفات مطابقة ";
+$lang["The filetype you are attempting to upload is not allowed."]="نوع الملف الذي تحاول رفعه غير مسموح به في الموقع.";
