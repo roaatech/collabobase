@@ -21,6 +21,7 @@ class Files extends MY_Controller {
         $category = $this->input->get("category", true);
         $author = $this->input->get("author", true);
         $search = $this->input->get("search", true);
+        $tags = $this->input->get("tags", true);
         $sort = $this->input->get("sort", true);
         $direction = strtolower($this->input->get("direction", true));
         $qs = $_SERVER['QUERY_STRING'];
@@ -39,6 +40,10 @@ class Files extends MY_Controller {
         }
         if ($search) {
             $condition.=($condition != "" ? " and" : "") . " (title like '%$search%')";
+        }
+        if ($tags) {
+            $ptags = "'" . str_replace(",", "','", $tags) . "'";
+            $condition.=($condition != "" ? " and" : "") . " id in (select file_id from post where id in (select post_id from post_tag where tag_id in (select id from tag where name in ($ptags))))";
         }
 
         //sort
@@ -168,7 +173,7 @@ class Files extends MY_Controller {
 
             //configuring the upload
             $config['upload_path'] = __DIR__ . DIRECTORY_SEPARATOR . '../../assets/uploads/';
-            $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|txt|tif|tiff';
+            $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|txt|tif|tiff|xls|xlsx|rtf';
             $config['max_size'] = '2048';
             $config['max_width'] = '0';
             $config['max_height'] = '0';
@@ -225,13 +230,13 @@ class Files extends MY_Controller {
 
     public function download($id, $versionId = null) {
 
+        $this->load->library('user_agent');
+
         //prepare fileModel
         $fileModel = FileQuery::getInstance()->findById($id);
         if (!$fileModel) {
             return $this->redirect("files");
         }
-
-
 
         //getting Last version
         if ($versionId === null) {
@@ -244,11 +249,16 @@ class Files extends MY_Controller {
         }
 
         //preparing data
-        $fileName = $version->getDownloadName();
+        if ($this->agent->is_mobile("Android")) {
+            $fileName = $version->getDownloadName(true);
+            $this->output->set_header("Content-type: application/octet-stream");
+            header("Content-Disposition: attachment; filename=\"$fileName\"");
+        } else {
+            $fileName = $version->getDownloadName();
+            $this->output->set_header("Content-type: {$version->file_type}; name={$fileName}");
+            header("Content-Disposition: attachment; filename=$fileName");
+        }
         $filePath = $this->getFileFullPath($version->file_name);
-
-        $this->output->set_header("Content-type: {$version->file_type}; name={$fileName}");
-        header("Content-Disposition: attachment; filename=$fileName");
         header("Content-Length: " . filesize($filePath));
 
         readfile($filePath);
@@ -304,7 +314,7 @@ class Files extends MY_Controller {
 
             //configuring the upload
             $config['upload_path'] = __DIR__ . DIRECTORY_SEPARATOR . '../../assets/uploads/';
-            $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|txt|tif|tiff';
+            $config['allowed_types'] = 'gif|jpg|png|pdf|doc|docx|txt|tif|tiff|xls|xlsx|rtf';
             $config['max_size'] = '2048';
             $config['max_width'] = '0';
             $config['max_height'] = '0';

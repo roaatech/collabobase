@@ -458,13 +458,18 @@ class PostPresenter extends Presenter {
         $add = ".";
         $content = $this->model()->col('content');
         $content = strip_tags($content);
-        if (str_word_count($content) > $length) {
+        if (stripos($content, " ") === false) {
             $add.="..";
+            $content = mb_substr($content, 0, $length * 10);
+        } else {
+            $content = preg_replace("#\s+#", " ", $content);
+            $content = explode(" ", $content);
+            if (count($content) > $length) {
+                $add.="..";
+            }
+            $content = array_slice($content, 0, $length);
+            $content = join(" ", $content);
         }
-        $content = preg_replace("#\s+#", " ", $content);
-        $content = explode(" ", $content);
-        $content = array_slice($content, 0, $length);
-        $content = join(" ", $content);
         return $content . $add;
     }
 

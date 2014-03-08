@@ -37,6 +37,7 @@ class Posts extends MY_Controller {
         $category = $this->input->get("category", true);
         $author = $this->input->get("author", true);
         $search = $this->input->get("search", true);
+        $tags = $this->input->get("tags", true);
         $sort = $this->input->get("sort", true);
         $direction = strtolower($this->input->get("direction", true));
         $qs = $_SERVER['QUERY_STRING'];
@@ -55,6 +56,10 @@ class Posts extends MY_Controller {
         }
         if ($search) {
             $condition.=($condition != "" ? " and" : "") . " (title like '%$search%' or content like '%$search%')";
+        }
+        if ($tags) {
+            $ptags = "'" . str_replace(",", "','", $tags) . "'";
+            $condition.=($condition != "" ? " and" : "") . " id in (select post_id from post_tag where tag_id in (select id from tag where name in ($ptags)))";
         }
 
         //sort
@@ -104,6 +109,7 @@ class Posts extends MY_Controller {
         $this->data['selected_category'] = $category;
         $this->data['selected_author'] = $author;
         $this->data['search'] = $search;
+        $this->data['search_tags'] = $tags;
         $this->data['sort_by_column'] = $sort;
         $this->data['sort_by_direction'] = $direction;
         $this->data['qs'] = $qs;

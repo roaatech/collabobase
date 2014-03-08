@@ -13,8 +13,9 @@ function displayReply(PostPresenter $reply, CurrentUser $currentUser) {
                 <?= __("Reply by ") ?><?= $reply->author() ?> <?= date_human($reply->time, $currentUser->timezone()) ?>.<br />
             </div>
             <h4><?= $reply->title() ?></h4>
-            <?= $reply->content() ?>
-
+            <div class="post-content">
+                <?= $reply->content() ?>
+            </div>
         </div>
         <div class="col-md-3 visible-lg visible-md">
             <div class="post-side-region">
@@ -91,6 +92,9 @@ $postCategory = $post->category();
             margin-top:30px;
         }
     }
+    .post-content{
+        word-wrap: break-word;
+    }
 </style>
 <div class="container" id="top">
 
@@ -111,7 +115,9 @@ $postCategory = $post->category();
             <?php if ($operation_result): ?>
                 <?= operationResult($operation_result) ?>
             <?php endif; ?>
-            <div class="post-content"><?= $post->content ?></div>
+            <div class="post-content">
+                <?= $post->content ?>
+            </div>
         </div>
         <div class="col-md-3">
             <div class="post-side-region">

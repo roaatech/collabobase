@@ -3,6 +3,9 @@
 if (!defined('BASEPATH'))
     exit('No direct script access allowed');
 
+/**
+ * @property CI_User_agent $agent
+ */
 class MY_Controller extends CI_Controller {
 
     const LEVEL_UP = "..";

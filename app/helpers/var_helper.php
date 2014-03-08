@@ -7,7 +7,9 @@
  */
 function pass($var, $functions) {
     foreach (explode(",", $functions) as $function) {
-        $var = $function($var);
+        if ($function) {
+            $var = $function($var);
+        }
     }
     return $var;
 }

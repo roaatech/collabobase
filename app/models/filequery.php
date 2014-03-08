@@ -551,10 +551,10 @@ class FileVersionModel extends Model {
         return $this->file;
     }
 
-    public function getDownloadName() {
+    public function getDownloadName($upperCaseExtension = false) {
         $this->assertExists();
         $name = str_replace([" ", "\t"], "_", $this->file()->title) . "_" . $this->version;
-        $name.="." . pathinfo($this->file_name, PATHINFO_EXTENSION);
+        $name.="." . pass(pathinfo($this->file_name, PATHINFO_EXTENSION), $upperCaseExtension ? "strtoupper" : "");
         return $name;
     }
 

@@ -60,7 +60,7 @@
         <h1>
             <?= __($title) ?>
             <br class="visible-xs" />
-            <div class="visible-sm pull-right">
+            <div class="hidden-xs pull-right">
                 <a class="btn btn-primary btn-md" href="<?= base_url('files/new') ?>"><i class="glyphicon glyphicon-plus-sign"></i> <?= __("New File") ?></a>
             </div>
             <small>
@@ -78,46 +78,63 @@
         <input type="hidden" id="sort-direction" name="direction" value="desc" />
         <!--<div class="side-region white" style="padding:5px;">-->
         <div class="row" id="form-controls">
-            <div class="col-sm-4 col-md-3 hidden-sm" id="buttons">
+            <div class="col-sm-3 visible-xs" id="buttons">
                 <a class="btn btn-primary btn-md" href="<?= base_url('files/new') ?>"><i class="glyphicon glyphicon-plus-sign"></i> <?= __("New File") ?></a>
             </div>
-            <div class="col-sm-4 col-md-3">
+            <div class="col-sm-3">
                 <div class="form-group" id="category-region">
                     <label class="control-label sr-only" for="list-category"><?= __("Author") ?></label>
                     <div class="input-group">
                         <span class="input-group-addon">
-                            <?= __("Author") ?>
+                            <label class="control-label" for="list-author"><?= __("Author") ?></label>
                         </span>
                         <select name="author" class="form-control" id="list-author" onchange="fw.logic.submitForm(this);">
-                            <option value=""><?= __("All authors") ?></option>
+                            <option value=""><?= __("All authors/*list option*/") ?></option>
                             <?= $users->asSelectListOptions($selected_author) ?>
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-4 col-md-3">
+            <div class="col-sm-3">
                 <div class="form-group" id="category-region">
                     <label class="control-label sr-only" for="list-category"><?= __("Category") ?></label>
                     <div class="input-group">
                         <span class="input-group-addon">
-                            <?= __("Category") ?>
+                            <label class="control-label" for="list-category"><?= __("Category") ?></label>
                         </span>
                         <select name="category" class="form-control" id="list-category" onchange="fw.logic.submitForm(this);">
-                            <option value=""><?= __("All categories") ?></option>
+                            <option value=""><?= __("All categories/*list option*/") ?></option>
                             <option value="uncategorized" <?= $selected_category == "uncategorized" ? "selected='selected'" : "" ?>><?= __("Uncategorized") ?></option>
                             <?= $categories->asSelectListOptionsTree($selected_category) ?>
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-4 col-md-3">
+            <div class="col-sm-3">
                 <div class="form-group" id="search-region">
-                    <label class="control-label sr-only" id="search-text"><?= __("Search") ?></label>
                     <div class="input-group">
+                        <span class="input-group-addon">
+                            <label class="control-label" for="search-text"><?= __("Search") ?></label>
+                        </span>
                         <input class="input form-control" id="search-text" type="search" name="search" placeholder="<?= __("search") ?>" value="<?= $search ?>" />
                         <span class="input-group-btn">
                             <button class="btn btn-default" id="update-list">
                                 <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group" id="tags-region">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <label class="control-label" for="search-tags"><?= __("Tags") ?></label>
+                        </span>
+                        <input class="input form-control" id="search-tags" type="search" name="tags" placeholder="<?= __("tags") ?>" value="<?= @$search_tags ?>" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default">
+                                <i class="glyphicon glyphicon-tag"></i>
                             </button>
                         </span>
                     </div>
@@ -131,7 +148,7 @@
         <table class="table table-hover table-striped table-bordered" id="data-table">
             <tr id="data-table-header">
                 <th style="width:5%">#</th>
-                <th>Category</th>
+                <th><?= __("Category") ?></th>
                 <th class="sortable" data-sort-by="title"><?= __("Title") ?></th>
                 <th class="sortable" data-sort-by="author"><?= __("By") ?></th>
                 <th class="sortable" data-sort-by="time"><?= __("Time") ?></th>
