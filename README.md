@@ -16,7 +16,7 @@ INSTALL
 ----------------------
 1. Copy the folder to a new apache folder.
 2. Create a database in MySQL.
-3. Import the schema.sql fild into the database.
+3. Import the schema.sql filث into the database.
 4. In app/config/database.php, update the host, username, password, and database name to which you have created.
 5. In app/config/config.php, update $config['base_url'] to the correct value of your installation. i.e. http://collabobase.yourdomain.com
 6. You may need to change the .htaccess, the last line to add the correct URL just before index.php/$1
