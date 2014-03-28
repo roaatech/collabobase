@@ -125,6 +125,7 @@ CREATE TABLE `chat_participant` (
   `role` set('viewer','user','admin','deleted') NOT NULL DEFAULT 'user',
   `chat_id` int(11) NOT NULL,
   `last_check` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_check_chat_message_id` INT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_chat_participant_user_chat` (`user_id`,`chat_id`),
   KEY `fk_chat_participant_user1_idx` (`user_id`),

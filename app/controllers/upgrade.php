@@ -27,7 +27,7 @@ class Upgrade extends MY_Controller {
             case "1":
                 echo "Upgrading to v1.0.1:\n";
                 echo "--------------------\n";
-                $this->exec("ALTER TABLE `chat_participant` ADD `last_check_chat_message_id` INT NULL , ADD INDEX (`last_check_chat_message_id`) ;", "Altering chat_participant table");
+                $this->exec("ALTER TABLE `chat_participant` ADD `last_check_chat_message_id` INT NULL;", "Altering chat_participant table");
                 $this->exec("update chat_participant p set last_check_chat_message_id = (select max(id) from chat_message where time<=p.last_check and chat_id = p.chat_id)", "Updaing chat_participant table data");
                 echo "\n";
 
