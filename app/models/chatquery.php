@@ -68,10 +68,12 @@ class ChatQuery extends ORM {
      * @return ChatModel
      */
     public function getTwoPartiesChat(UserModel $user1, UserModel $user2) {
-        $chat = $this->_all("id in (select count(user_id) from chat_participant group by chat_id having count(user_id)=2 where user_id in ({$user1->id}, {$user2->id})) and title is null")->fetch();
+        $chat = $this->_all("id in (select chat_id from chat_participant where user_id in ({$user1->id}, {$user2->id}) group by chat_id having count(user_id)=2) and title is null")->fetch();
         if (!$chat) {
             $chat = $this->createNewChat($user1, NULL, null);
             $chat->addChatParticipant($user2);
+        } else {
+            $chat = ChatModel::create($chat);
         }
         return $chat;
     }
@@ -692,7 +694,7 @@ class ChatParticipantModel extends Model {
      */
     public function getNewMessages() {
         $this->assertExists();
-        $messages = $this->getMessages("`time` > (select `last_check` from chat_participant where id={$this->id})", true);
+        $messages = $this->getMessages("`id` > (select `last_check_chat_message_id` from chat_participant where id={$this->id})", true);
         return $messages;
     }
 
@@ -713,6 +715,7 @@ class ChatParticipantModel extends Model {
     protected function updateLastCheck() {
         $this->assertExists();
         $this->last_check = date('Y-m-d H:i:s');
+        $this->last_check_chat_message_id = $this->getPdo()->query("select max(id) from chat_message where chat_id = '{$this->chat_id}'")->fetchColumn();
         $this->save();
     }
 

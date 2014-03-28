@@ -31,7 +31,7 @@ $config['base_url'] = substr((@$_SERVER['HTTPS'] ? "https" : "http") . "://" . $
   | variable so that it is blank.
   |
  */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
   |--------------------------------------------------------------------------
@@ -361,6 +361,8 @@ $config['rewrite_short_tags'] = FALSE;
   |
  */
 $config['proxy_ips'] = '';
+
+$config['app_version'] = 1.1;
 
 
 /* End of file config.php */

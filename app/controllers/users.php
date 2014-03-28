@@ -52,8 +52,8 @@ class Users extends MY_Controller {
         $this->protectedArea(UserModel::ROLE_ADMIN);
 
         $this->form_validation->set_rules('username', 'Username', 'required|is_unique[user.username]|min_length[4]|max_length[20]|alpha_dash|xss_clean');
-        $this->form_validation->set_rules('firstname', 'First Name', 'required|max_length[20]|alpha|xss_clean');
-        $this->form_validation->set_rules('lastname', 'Last Name', 'required|max_length[20]|alpha|xss_clean');
+        $this->form_validation->set_rules('firstname', 'First Name', 'required|max_length[20]|xss_clean');
+        $this->form_validation->set_rules('lastname', 'Last Name', 'required|max_length[20]|xss_clean');
         $this->form_validation->set_rules('role', 'User Role', 'required|callback_check_role');
         $this->form_validation->set_rules('note', 'Note', 'xss_clean');
 

@@ -21,7 +21,7 @@
         <div class="pull-right hidden-xs">
             <a href="#" onclick="fw.logic.confirmLeaveChat(<?= $chat->id ?>)" class="" title="<?= __("Leave Chat") ?>)"><i class="glyphicon glyphicon-off"></i> <?= __("Leave Chat") ?></a>
             <?php if ($current_user->canEditChat($chat->model())): ?>
-                &nbsp; <a href="#" onclick="fw.logic.editChat()" class="" title="Edit Chat"><i class="glyphicon glyphicon-edit"></i> <?= __("Edit Chat") ?></a>
+                &nbsp; <a href="#" onclick="fw.logic.editChat()" class="" title="Edit Chat"><i class="glyphicon glyphicon-edit"></i> <?= __("Change Subject") ?></a>
             <?php endif; ?>
         </div>
         <div class="text-muted"><?= __("Created on") ?> <?= $chat->time($this->currentUser()->timezone()) ?>.</div>

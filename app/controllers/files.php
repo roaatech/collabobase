@@ -251,11 +251,11 @@ class Files extends MY_Controller {
         //preparing data
         if ($this->agent->is_mobile("Android")) {
             $fileName = $version->getDownloadName(true);
-            $this->output->set_header("Content-type: application/octet-stream");
+            $this->output->set_header("Content-Type: application/octet-stream");
             header("Content-Disposition: attachment; filename=\"$fileName\"");
         } else {
             $fileName = $version->getDownloadName();
-            $this->output->set_header("Content-type: {$version->file_type}; name={$fileName}");
+            $this->output->set_header("Content-Type: {$version->file_type}; name={$fileName}");
             header("Content-Disposition: attachment; filename=$fileName");
         }
         $filePath = $this->getFileFullPath($version->file_name);
