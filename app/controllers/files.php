@@ -231,6 +231,8 @@ class Files extends MY_Controller {
     public function download($id, $versionId = null) {
 
         $this->load->library('user_agent');
+        $this->load->library('MobileDetect');
+        $detector = new MobileDetect();
 
         //prepare fileModel
         $fileModel = FileQuery::getInstance()->findById($id);
@@ -249,7 +251,8 @@ class Files extends MY_Controller {
         }
 
         //preparing data
-        if ($this->agent->is_mobile("Android")) {
+//        if ($this->agent->is_mobile("Android")) {
+        if ($detector->isAndroidOS()) {
             $fileName = $version->getDownloadName(true);
             $this->output->set_header("Content-Type: application/octet-stream");
             header("Content-Disposition: attachment; filename=\"$fileName\"");
