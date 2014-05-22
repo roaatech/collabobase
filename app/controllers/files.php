@@ -174,7 +174,7 @@ class Files extends MY_Controller {
             //configuring the upload
             $config['upload_path'] = __DIR__ . DIRECTORY_SEPARATOR . '../../assets/uploads/';
             $config['allowed_types'] = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "allowed_types.txt");
-            $config['max_size'] = '2048';
+            $config['max_size'] = '0';
             $config['max_width'] = '0';
             $config['max_height'] = '0';
             $config['encrypt_name'] = true;
@@ -252,15 +252,15 @@ class Files extends MY_Controller {
 
         //preparing data
 //        if ($this->agent->is_mobile("Android")) {
-        if ($detector->isAndroidOS()) {
+//        if ($detector->isAndroidOS()) {
             $fileName = $version->getDownloadName(true);
             $this->output->set_header("Content-Type: application/octet-stream");
-            header("Content-Disposition: attachment; filename=\"$fileName\"");
-        } else {
-            $fileName = $version->getDownloadName();
-            $this->output->set_header("Content-Type: {$version->file_type}; name={$fileName}");
-            header("Content-Disposition: attachment; filename=$fileName");
-        }
+            $this->output->set_header("Content-Disposition: attachment; filename=\"$fileName\"");
+//        } else {
+//            $fileName = $version->getDownloadName();
+//            $this->output->set_header("Content-Type: {$version->file_type}; name={$fileName}");
+//            $this->output->set_header("Content-Disposition: attachment; filename=$fileName");
+//        }
         $filePath = $this->getFileFullPath($version->file_name);
         header("Content-Length: " . filesize($filePath));
 
@@ -318,7 +318,7 @@ class Files extends MY_Controller {
             //configuring the upload
             $config['upload_path'] = __DIR__ . DIRECTORY_SEPARATOR . '../../assets/uploads/';
             $config['allowed_types'] = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "allowed_types.txt");
-            $config['max_size'] = '2048';
+            $config['max_size'] = '0';
             $config['max_width'] = '0';
             $config['max_height'] = '0';
             $config['encrypt_name'] = true;
