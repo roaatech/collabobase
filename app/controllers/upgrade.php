@@ -4,7 +4,7 @@ class Upgrade extends MY_Controller
 {
 
     protected $versions = [
-        1.13
+        1.1
     ];
     protected $upgradeResult = true;
 
@@ -42,7 +42,7 @@ class Upgrade extends MY_Controller
 
     protected function lastVersion()
     {
-        return 1.13;
+        return $this->versions[count($this->versions) - 1];
     }
 
     protected function upgradeMigrationStart()
@@ -50,11 +50,11 @@ class Upgrade extends MY_Controller
         $this->upgradeResult = true;
     }
 
-    protected function up_1_13()
+    protected function up_1_1()
     {
-//        $this->exec("ALTER TABLE `file` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||', ADD INDEX(`rights`);", "Preparing files rights");
+        $this->exec("ALTER TABLE `file` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||', ADD INDEX(`rights`);", "Preparing files rights");
         $this->exec("UPDATE `file` SET `rights` = '|| WHERE `rights` IS NULL';", "Modifying old records");
-//        $this->exec("ALTER TABLE `post` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||', ADD INDEX(`rights`);", "Preparing posts rights");
+        $this->exec("ALTER TABLE `post` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||', ADD INDEX(`rights`);", "Preparing posts rights");
         $this->exec("UPDATE `post` SET `rights` = '|| WHERE `rights` IS NULL';", "Modifying old records");
     }
 
