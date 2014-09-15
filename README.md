@@ -3,16 +3,7 @@ ABOUT
 Collabobase (Collaboration Base) is a simple web app that creates a collaboration environment
 for an organization. Install it, create users, and they will be able to discuss and share files
 between them, in addition to have a quick messagaing system.
-
 Built on Codeigniter, NotORM, Twitter Bootstrap v3, and supports LTR and RTL.
-
-CURRENT VERSION
-----------------------
-1.13
-
-DB UPGRADING
-----------------------
-After checkout, upgrade the database by calling http://url_to_system/upgrade
 
 REQUIREMENTS
 ----------------------
@@ -27,6 +18,10 @@ INSTALL
 3. Import the schema.sql file into the database.
 4. In app/config/database.php, update the host, username, password, and database name to which you have created.
 5. You may need to change the .htaccess, the last line to add the correct URL just before index.php/$1
+
+DB UPGRADING
+----------------------
+After checkout, upgrade the database by calling http://url_to_system/upgrade.
 
 FIRST USE
 ----------------------
