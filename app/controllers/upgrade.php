@@ -116,8 +116,7 @@ class Upgrade extends MY_Controller
         $currentVersion = $this->getVersion();
         $lastVersion = $this->lastVersion();
 
-        echo "Current version: <strong>{$currentVersion}</strong>.<br />";
-        echo "Last version: <strong>{$lastVersion}</strong>.<br />";
+        echo "Versions: current <strong>{$currentVersion}</strong> - last <strong>{$lastVersion}</strong>.<br />";
 
         if ($currentVersion === $lastVersion) {
             echo "<h2>Congratulations!</h2><p>You already have the last upgrades!</p>";
@@ -148,8 +147,7 @@ class Upgrade extends MY_Controller
             }
         }
 
-        echo "Current version: <strong>{$this->getVersion()}</strong>.<br />";
-        echo "Last version: <strong>{$this->lastVersion()}</strong>.<br />";
+        echo "Versions: current <strong>{$this->getVersion()}</strong> - last <strong>{$this->lastVersion()}</strong>.<br />";
     }
 
 }
