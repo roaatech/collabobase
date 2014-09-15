@@ -4,7 +4,9 @@ class Upgrade extends MY_Controller
 {
 
     protected $versions = [
-        1.1
+        "1.0.1",
+        "1.1.0",
+        "1.1.1"
     ];
     protected $upgradeResult = true;
 
@@ -19,7 +21,11 @@ class Upgrade extends MY_Controller
     {
         $path = __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "version";
         if (!file_exists($path)) {
-            touch($path);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "downloaded")) {
+                copy(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "version", $path);
+            } else {
+                touch($path);
+            }
         }
         return $path;
     }
@@ -27,17 +33,17 @@ class Upgrade extends MY_Controller
     protected function setVersion($version)
     {
         $path = $this->getVersionFile();
-        file_put_contents($path, (float) $version);
+        file_put_contents($path, (string) $version);
     }
 
     protected function getVersion()
     {
-        return (float) file_get_contents($this->getVersionFile());
+        return (string) file_get_contents($this->getVersionFile());
     }
 
     protected function checkVersion($version)
     {
-        return $this->getVersion() === (float) $version;
+        return $this->getVersion() === (string) $version;
     }
 
     protected function lastVersion()
@@ -50,12 +56,23 @@ class Upgrade extends MY_Controller
         $this->upgradeResult = true;
     }
 
-    protected function up_1_1()
+    protected function readUpgrade($version)
     {
-        $this->exec("ALTER TABLE `file` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||', ADD INDEX(`rights`);", "Preparing files rights");
-        $this->exec("UPDATE `file` SET `rights` = '|| WHERE `rights` IS NULL';", "Modifying old records");
-        $this->exec("ALTER TABLE `post` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||', ADD INDEX(`rights`);", "Preparing posts rights");
-        $this->exec("UPDATE `post` SET `rights` = '|| WHERE `rights` IS NULL';", "Modifying old records");
+        $dir = __DIR__;
+        $ds = DIRECTORY_SEPARATOR;
+        $file = "{$dir}{$ds}..{$ds}upgrades{$ds}{$version}.sql";
+        if (!file_exists($file)) {
+            user_error("Can not find upgrade file for {$version} in app/upgrades", E_USER_ERROR);
+        }
+        $commands = explode("---", file_get_contents($file));
+        array_shift($commands);
+        foreach ($commands as $command) {
+            @list($title, $command) = @explode("\n", $command, 2);
+            $command = trim($command);
+            if ($command) {
+                $this->exec($command, $title);
+            }
+        }
     }
 
     protected function exec($stmt, $title)
@@ -103,10 +120,9 @@ class Upgrade extends MY_Controller
         for ($i = $currentPosition + 1; $i <= $lastPosition; $i++) {
             $version = $this->versions[$i];
             $textVersion = str_replace(".", "_", "$version");
-            $method = "up_$textVersion";
             echo "<h2>Upgrading to version $version</h2>";
             $this->upgradeMigrationStart();
-            $this->$method();
+            $this->readUpgrade($version);
             if ($this->upgradeResult === true) {
                 $this->setVersion($version);
                 echo "<p>Upgrading succeeded.</p>";
@@ -115,11 +131,8 @@ class Upgrade extends MY_Controller
             }
         }
 
-        $currentVersion = $this->getVersion();
-        $lastVersion = $this->lastVersion();
-
-        echo "Current version: <strong>{$currentVersion}</strong>.<br />";
-        echo "Last version: <strong>{$lastVersion}</strong>.<br />";
+        echo "Current version: <strong>{$this->getVersion()}</strong>.<br />";
+        echo "Last version: <strong>{$this->lastVersion()}</strong>.<br />";
     }
 
 }
