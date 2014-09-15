@@ -6,6 +6,11 @@ between them, in addition to have a quick messagaing system.
 
 Built on Codeigniter, NotORM, Twitter Bootstrap v3, and supports LTR and RTL.
 
+VERSION
+----------------------
+1.13
+After checkout, upgrade the database by calling http://url_to_system/upgrade
+
 REQUIREMENTS
 ----------------------
 1. Apache v2.+, rewrite module is enabled.
