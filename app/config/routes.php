@@ -81,6 +81,7 @@ $route['permalink(:any)'] = 'landing';
 $route['(:any)/(:any)'] = '$1/$2';
 $route['(:any)'] = 'pages/$1';
 $route['404_override'] = '';
+$route["upgrade"] = "upgrade/up";
 
 
 /* End of file routes.php */
