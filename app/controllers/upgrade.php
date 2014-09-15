@@ -3,11 +3,7 @@
 class Upgrade extends MY_Controller
 {
 
-    protected $versions = [
-        "1.0.1",
-        "1.1.0",
-        "1.1.1"
-    ];
+    protected $versions;
     protected $upgradeResult = true;
 
     public function __construct()
@@ -15,14 +11,21 @@ class Upgrade extends MY_Controller
         parent::__construct();
         $this->protectedArea(UserModel::ROLE_ADMIN);
         echo "<h1>Collabobase Upgrade System</h1>";
+        $path = __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "upgrades" . DIRECTORY_SEPARATOR . "versions";
+        if (!file_exists($path)) {
+            user_error("Versions file does not exist in app/upgrades!", E_USER_ERROR);
+        }
+        $this->versions = array_map(function($item) {
+            return trim($item);
+        }, file($path));
     }
 
     protected function getVersionFile()
     {
-        $path = __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "version";
+        $path = __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "upgrades" . DIRECTORY_SEPARATOR . "version";
         if (!file_exists($path)) {
-            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "downloaded")) {
-                copy(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "version", $path);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "upgrades" . DIRECTORY_SEPARATOR . "downloaded")) {
+                copy(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "upgrades" . DIRECTORY_SEPARATOR . "downloaded", $path);
             } else {
                 touch($path);
             }
@@ -38,7 +41,11 @@ class Upgrade extends MY_Controller
 
     protected function getVersion()
     {
-        return (string) file_get_contents($this->getVersionFile());
+        $result = (string) file_get_contents($this->getVersionFile());
+        if (!$result) {
+            $result = "0";
+        }
+        return $result;
     }
 
     protected function checkVersion($version)
@@ -85,7 +92,14 @@ class Upgrade extends MY_Controller
         }
         echo "$title: ";
         try {
-            $pdo->exec($stmt);
+            $stmt = trim($stmt);
+            $stmt = preg_replace("/\s+/", " ", $stmt);
+            if (strtolower(substr($stmt, 0, 6)) == "select") {
+                $pstmt = $pdo->query($stmt);
+                $pstmt->closeCursor();
+            } else {
+                $pdo->exec($stmt);
+            }
             echo "Done.";
         } catch (Exception $e) {
             echo "Failed: {$e->getCode()}: {$e->getMessage()}.";
@@ -110,24 +124,27 @@ class Upgrade extends MY_Controller
             return;
         }
 
-        $currentPosition = $currentVersion == 0 ? -1 : array_search($currentVersion, $this->versions);
+        $currentPosition = array_search($currentVersion, $this->versions);
         $lastPosition = array_search($lastVersion, $this->versions);
 
-        if ($currentPosition === false || $lastPosition === false) {
-            user_error("Current or last versions are undefined", E_USER_ERROR);
+        if ($currentPosition === false) {
+            $currentPosition = -1;
+        }
+        if ($lastPosition === false) {
+            user_error("Last version ($lastVersion) is undefined", E_USER_ERROR);
         }
 
         for ($i = $currentPosition + 1; $i <= $lastPosition; $i++) {
-            $version = $this->versions[$i];
-            $textVersion = str_replace(".", "_", "$version");
-            echo "<h2>Upgrading to version $version</h2>";
             $this->upgradeMigrationStart();
+            $version = $this->versions[$i];
+            echo "<h2>Upgrading to version $version</h2>";
             $this->readUpgrade($version);
             if ($this->upgradeResult === true) {
                 $this->setVersion($version);
                 echo "<p>Upgrading succeeded.</p>";
             } else {
                 echo "<p>Upgrading failed.</p>";
+                break;
             }
         }
 
