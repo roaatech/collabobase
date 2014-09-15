@@ -3,7 +3,8 @@
 /* @var $post PostModel */
 /* @var $postCategory CategoryModel */
 
-function echoList($categories, CategoryModel $selectedCategory = null) {
+function echoList($categories, CategoryModel $selectedCategory = null)
+{
 
     static $level = 1;
     $prepend = str_repeat("&nbsp;", $level * 3);
@@ -26,7 +27,8 @@ function echoList($categories, CategoryModel $selectedCategory = null) {
     return $result;
 }
 
-function statusBadge($status) {
+function statusBadge($status)
+{
     switch (strtolower($status)) {
         case PostModel::STATUS_ACTIVE:
             return "badge-success";
@@ -114,6 +116,13 @@ $isModification = $post->col("id") !== null;
                             <div class="form-group">
                                 <label class="control-label" for="post-tag"><?= __("Tags") ?></label>
                                 <textarea id="post-tag" name="tag" class="form-control" placeholder="<?= __("Write post tags") ?>"><?= $post->presenter()->tagsCsv() ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="post-rights"><?= __("Rights") ?></label>
+                                <select multiple="multiple" name="rights[]" id="post-rights" class="form-control" placeholder="<?= __("Select users") ?>">
+                                    <?= $users->asSelectListOptions($post->rights) ?>
+                                </select>
+                                <p class="help-block"><?= __("Keep empty for open access") ?>.</p>
                             </div>
                         <?php else: ?>
                             <div class="form-group">
@@ -219,7 +228,7 @@ $isModification = $post->col("id") !== null;
     function cancelPost() {
         $.showdal({body: "<?= __("Are you sure you want to cancel this post?") ?>", title: "<?= __("Cancel Confirmation") ?>", buttons: {
                 "Yes": {
-                    action: function() {
+                    action: function () {
                         doCancelPost();
                         $(this).showdal("close");
                     },
@@ -246,7 +255,7 @@ $isModification = $post->col("id") !== null;
         return true;
     }
 
-    jQuery(function() {
+    jQuery(function () {
         $("#post-content-editor").summernote({
             toolbar: [
                 ['style', ['style']], // no style button
@@ -262,7 +271,7 @@ $isModification = $post->col("id") !== null;
             ]
         });
 
-        $("#post-form").submit(function() {
+        $("#post-form").submit(function () {
             if (!updateForm())
                 return false;
 //            $("#post-content-editor").destroy();
@@ -273,16 +282,16 @@ $isModification = $post->col("id") !== null;
 
         $("#post-category").selectize({
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return "<div>" + trim(escape(item.text)) + "</div>";
                 }
             },
-            onChange: function(value) {
+            onChange: function (value) {
                 displayValue = trim(this.getOption(value).text());
                 if (!displayValue)
                     displayValue = "<?= __("Uncategorized") ?>";
                 $(".post-category-display").value(displayValue);
-            },
+            }
         });
         $("#post-tag").selectize({
             persist: false,
@@ -294,34 +303,47 @@ $isModification = $post->col("id") !== null;
 //                {tag: 'aaa'}, {tag: 'bbb'}, {tag: 'ccc'}
 //            ],
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return "<div>" + escape(item.tag) + "</div>";
                 },
-                option: function(item, escape) {
+                option: function (item, escape) {
                     return "<div>" + escape(item.tag) + "</div>";
                 }
             },
-            create: function(input) {
+            create: function (input) {
                 return {tag: input};
             },
-            load: function(query, callback) {
+            load: function (query, callback) {
                 if (!query.length)
                     return callback();
                 $.ajax({
                     url: '<?= base_url('tags/search/') ?>' + encodeURIComponent(query),
                     type: 'GET',
-                    error: function() {
+                    error: function () {
                         callback();
                     },
-                    success: function(res) {
+                    success: function (res) {
                         callback(res);
                     }
                 });
             },
-            onChange: function(value) {
+            onChange: function (value) {
                 displayValue = trim(value);
                 displayTags(displayValue);
-            },
+            }
+        });
+
+        $("select#post-rights").selectize({
+            create: false,
+            hideSelected: true,
+            delimiter: ",",
+            onChange: function (value) {
+                res = "";
+                for (i in value) {
+                    res += (i > 0 ? "," : "") + value[i];
+                }
+                $(".chat-participants").val(res);
+            }
         });
 
         $(".preview-mode").hide();

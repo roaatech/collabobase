@@ -1,6 +1,7 @@
 <?php
 
-class Posts extends MY_Controller {
+class Posts extends MY_Controller
+{
 
     protected $data = [
         "title" => "Discussions",
@@ -8,7 +9,8 @@ class Posts extends MY_Controller {
         "active_tab" => "discussion",
     ];
 
-    public function __construct() {
+    public function __construct()
+    {
         //parent constructor
         parent::__construct();
 
@@ -23,13 +25,15 @@ class Posts extends MY_Controller {
         $this->load->model('TagQuery');
     }
 
-    public function Index($page = 1) {
+    public function Index($page = 1)
+    {
         $this->setData("active", 1);
 
         return $this->postsList($page, 'active');
     }
 
-    protected function postsList($page, $status = 'active') {
+    protected function postsList($page, $status = 'active')
+    {
 
         define('rpp', 10);
 
@@ -42,8 +46,10 @@ class Posts extends MY_Controller {
         $direction = strtolower($this->input->get("direction", true));
         $qs = $_SERVER['QUERY_STRING'];
 
+        $rights = $this->currentUser()->isSupervisor() ? ["%"] : ["||", "%|{$this->currentUser()->model()->id}|%"];
+
         //condition
-        $condition = "status = '$status' and file_id is null";
+        $condition = "status = '$status' and file_id is null and (user_id = {$this->currentUser()->model()->id} or rights like '" . implode("' or rights like '", $rights) . "')";
         if ($category && $category != "uncategorized") {
             $condition.=" and id in (select post_id from post_category where category_id = '$category')";
         }if ($category && $category == "uncategorized") {
@@ -117,7 +123,8 @@ class Posts extends MY_Controller {
         $this->view_loader->load("internal/posts/list", $this->data, 'internal');
     }
 
-    protected function post_form(PostModel $post) {
+    protected function post_form(PostModel $post)
+    {
 
         //prepare the data
         $categories = CategoryStates::getTree();
@@ -132,23 +139,36 @@ class Posts extends MY_Controller {
         $this->view_loader->load("internal/posts/post_form", $this->data, 'internal');
     }
 
-    public function create() {
+    public function create()
+    {
         $post = PostModel::createEmpty($this->currentUser()->model());
+
+        $users = UserQuery::getInstance()->all("id != {$this->currentUser()->model()->id}", UserQuery::RETURN_AS_PRESENTER);
+        $this->setData("users", $users);
 
         return $this->post_form($post);
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $post = PostQuery::getInstance()->findById($id);
 
         if (!$post || $post->isForFile()) {
             $this->redirectWithOperationMessage("posts", "The specified post does not exist!", 1);
         }
 
+        if (!$this->currentUser()->canEditPost($post)) {
+            $this->redirectWithOperationMessage("posts", "Can not edit the specified post!", 1);
+        }
+
+        $users = UserQuery::getInstance()->all("id != {$this->currentUser()->model()->id}", UserQuery::RETURN_AS_PRESENTER);
+        $this->setData("users", $users);
+
         return $this->post_form($post);
     }
 
-    public function submit() {
+    public function submit()
+    {
         try {
 
             //
@@ -171,6 +191,7 @@ class Posts extends MY_Controller {
             $postId = $this->input->post('post_id');
             $categoryId = $this->input->post('category');
             $tags = $this->input->post('tag');
+            $rights = $this->input->post('rights', true)? : [];
 
             if ($categoryId) {
                 $category = CategoryQuery::getInstance()->findById($categoryId);
@@ -184,7 +205,7 @@ class Posts extends MY_Controller {
             }
 
             if (!$postId) {
-                $post = PostQuery::getInstance()->InsertNew($title, $content, $this->currentUser()->model());
+                $post = PostQuery::getInstance()->InsertNew($title, $content, $this->currentUser()->model(), null, null, $rights);
                 $post->category($category, true);
                 $post->setTags($tags);
                 $postId = $post->col('id');
@@ -193,7 +214,10 @@ class Posts extends MY_Controller {
                 if (!$post || $post->isForFile()) {
                     throw new Exception("Not a post", 1);
                 }
-                $post->update($title, $content, $category, $tags, $this->currentUser()->model());
+                if (!$this->currentUser()->canEditPost($post)) {
+                    throw new Exception("You can not edit the specified post", 1);
+                }
+                $post->update($title, $content, $category, $tags, $this->currentUser()->model(), $rights);
             }
 
 
@@ -209,11 +233,15 @@ class Posts extends MY_Controller {
         }
     }
 
-    public function post($id) {
+    public function post($id)
+    {
 
         $post = PostQuery::getInstance()->findById($id);
         if (!$post || $post->isForFile() || $post->isDraft()) {
             $this->redirectWithOperationMessage("posts", "The specified post does not exist!", 1);
+        }
+        if (!$this->currentUser()->canViewPost($post)) {
+            $this->redirectWithOperationMessage("posts", "The specified post is prohibited!", 1);
         }
         $replies = $post->getReplies("status='active'")->order("time asc");
 
@@ -224,11 +252,13 @@ class Posts extends MY_Controller {
         return $this->view_loader->load("internal/posts/view", $this->data, 'internal');
     }
 
-    protected function post_submit_error($errors) {
+    protected function post_submit_error($errors)
+    {
         var_dump($errors);
     }
 
-    public function reply() {
+    public function reply()
+    {
 
         try {
 
@@ -256,6 +286,9 @@ class Posts extends MY_Controller {
             if (!$post) {
                 throw new Exception("The provided post is invalied!", 1);
             }
+            if (!$this->currentUser()->canViewPost($post)) {
+                $this->redirectWithOperationMessage("posts", "The specified post is prohibited!", 1);
+            }
 
             $replyPost = $post->addReply($content, $title, $this->currentUser()->model());
 
@@ -265,14 +298,16 @@ class Posts extends MY_Controller {
         }
     }
 
-    public function drafts($page = 1) {
+    public function drafts($page = 1)
+    {
         $this->setData("sub_title", "Your Drafts");
         $this->setData("active", 0);
 
         return $this->postsList($page, 'draft');
     }
 
-    public function delete() {
+    public function delete()
+    {
 
         $this->protectedArea();
 
@@ -295,7 +330,8 @@ class Posts extends MY_Controller {
         }
     }
 
-    public function close() {
+    public function close()
+    {
 
         $id = $this->input->post("id", true);
         $post = PostQuery::getInstance()->findById($id);
@@ -312,7 +348,8 @@ class Posts extends MY_Controller {
         return $this->redirectWithOperationMessage("posts/post/{$post->getRootPost()->id}", "The discussion has been closed successfully!");
     }
 
-    public function closed($page = 1) {
+    public function closed($page = 1)
+    {
 
         $this->setData("sub_title", "Closed Discussions");
         $this->setData("active", 0);

@@ -10,14 +10,15 @@ $file_category = "";
 $file_tags = "";
 switch ($action) {
     case 'edit_file':
-        $sub_title = "<a href='" . base_url("files") . "'>".__("Files List")."</a> &gt; <a href='" . FilePermaLink::view($file->id) . "'>" . $file->title . "</a> &gt; ".__("Edit File");
+        $sub_title = "<a href='" . base_url("files") . "'>" . __("Files List") . "</a> &gt; <a href='" . FilePermaLink::view($file->id) . "'>" . $file->title . "</a> &gt; " . __("Edit File");
         $file_title = $file->title;
         $file_description = $file->post()->content();
         $file_category = $file->post()->category();
         $file_tags = $file->post()->presenter()->tagsCsv();
+        $file_rights = $file->rights;
         break;
     case 'new_version':
-        $sub_title = "<a href='" . base_url("files") . "'>".__("Files List")."</a> &gt; <a href='" . FilePermaLink::view($file->id) . "'>" . $file->title . "</a> &gt; ".__("New Version");
+        $sub_title = "<a href='" . base_url("files") . "'>" . __("Files List") . "</a> &gt; <a href='" . FilePermaLink::view($file->id) . "'>" . $file->title . "</a> &gt; " . __("New Version");
         break;
     case 'new_file':
         $sub_title = __("Upload New File");
@@ -127,6 +128,13 @@ switch ($action) {
                             <label class="control-label" for="file-tags"><?= __("Tags") ?></label>
                             <input class="form-control original-control" type="text" id="file-tags" name="tags" placeholder="<?= __("Add file tags") ?>" value="<?= $file_tags ?>" />
                         </div>
+                        <div class="form-group">
+                            <label class="control-label" for="file-rights"><?= __("Rights") ?></label>
+                            <select multiple="multiple" name="rights[]" id="file-rights" class="form-control" placeholder="<?= __("Select users") ?>">
+                                <?= $users->asSelectListOptions(@$file_rights? : null) ?>
+                            </select>
+                            <p class="help-block"><?= __("Keep empty for open access") ?>.</p>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -153,10 +161,10 @@ switch ($action) {
 </div>
 <script type="text/javascript">
 
-    jQuery(function() {
+    jQuery(function () {
 
         $.extend(fw.logic, {
-            submitForm: function(form) {
+            submitForm: function (form) {
             }
         });
 
@@ -178,11 +186,11 @@ switch ($action) {
 
         $("#file-category").selectize({
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return "<div>" + trim(escape(item.text)) + "</div>";
                 }
             },
-            onChange: function(value) {
+            onChange: function (value) {
                 displayValue = trim(this.getOption(value).text());
                 if (!displayValue)
                     displayValue = "Uncategorized";
@@ -199,35 +207,48 @@ switch ($action) {
 //                {tag: 'aaa'}, {tag: 'bbb'}, {tag: 'ccc'}
 //            ],
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return "<div>" + escape(item.tag) + "</div>";
                 },
-                option: function(item, escape) {
+                option: function (item, escape) {
                     return "<div>" + escape(item.tag) + "</div>";
                 }
             },
-            create: function(input) {
+            create: function (input) {
                 return {tag: input};
             },
-            load: function(query, callback) {
+            load: function (query, callback) {
                 if (!query.length)
                     return callback();
                 $.ajax({
                     url: '<?= base_url('tags/search/') ?>' + encodeURIComponent(query),
                     type: 'GET',
-                    error: function() {
+                    error: function () {
                         callback();
                     },
-                    success: function(res) {
+                    success: function (res) {
                         callback(res);
                     }
                 });
             },
-            onChange: function(value) {
+            onChange: function (value) {
             },
         });
 
-        $("form#file-form").submit(function() {
+        $("select#file-rights").selectize({
+            create: false,
+            hideSelected: true,
+            delimiter: ",",
+            onChange: function (value) {
+                res = "";
+                for (i in value) {
+                    res += (i > 0 ? "," : "") + value[i];
+                }
+                $(".chat-participants").val(res);
+            }
+        });
+
+        $("form#file-form").submit(function () {
             return fw.logic.submitForm(this);
         });
     });

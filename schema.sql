@@ -833,3 +833,11 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed
+
+
+
+-- Upgrade to v1.13
+ALTER TABLE `file` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||' , ADD INDEX (`rights`);
+ALTER TABLE `post` ADD `rights` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '||' , ADD INDEX (`rights`) ;
+UPDATE `post` SET `rights` = "||";
+UPDATE `file` SET `rights` = "||";

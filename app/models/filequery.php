@@ -2,7 +2,8 @@
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'postquery.php';
 
-class FileQuery extends ORM {
+class FileQuery extends ORM
+{
 
     /**
      * 
@@ -11,7 +12,8 @@ class FileQuery extends ORM {
      * @param type $user
      * @return boolean|PostModel
      */
-    public function insertNew($title, $description, UserModel $user) {
+    public function insertNew($title, $description, UserModel $user, array $rights = [])
+    {
         try {
 
 
@@ -24,6 +26,7 @@ class FileQuery extends ORM {
                 'user_id' => $user->id,
                 'time' => $now,
                 'update_time' => $now,
+                'rights' => "|" . implode("|", $rights) . "|",
             ));
 
             $fileModel = FileModel::create($file);
@@ -46,7 +49,8 @@ class FileQuery extends ORM {
      * @param type $id
      * @return FileModel
      */
-    public function findById($id) {
+    public function findById($id)
+    {
         $result = $this->file()->where("id = '$id'")->fetch();
         if ($result)
             $result = FileModel::create($result);
@@ -59,7 +63,8 @@ class FileQuery extends ORM {
      * @param integer $returnAs
      * @return NotORM_Result|FileModelSet|FilePresenterSet
      */
-    public function allActive($condition = null, $returnAs = self::RETURN_AS_MODEL) {
+    public function allActive($condition = null, $returnAs = self::RETURN_AS_MODEL)
+    {
         $files = $this->file("`status` = 'active'");
         /* @var $files NotORM_Result */
         if ($condition) {
@@ -79,7 +84,8 @@ class FileQuery extends ORM {
  * @property PostModel $post
  * @property FileVersionModel $lastVersion
  */
-class FileModel extends Model {
+class FileModel extends Model
+{
 
     protected $post = null;
     protected $lastVersion = null;
@@ -88,7 +94,8 @@ class FileModel extends Model {
      * 
      * @return FilePresenter
      */
-    public function presenter() {
+    public function presenter()
+    {
         return FilePresenter::create($this);
     }
 
@@ -97,7 +104,8 @@ class FileModel extends Model {
      * @param \NotORM_Row $row
      * @return \FileModel
      */
-    public static function create(\NotORM_Row $row) {
+    public static function create(\NotORM_Row $row)
+    {
         return new FileModel($row);
     }
 
@@ -109,7 +117,8 @@ class FileModel extends Model {
      * @param UserModel $user
      * @return boolean|FileVersionModel
      */
-    public function insertVersion($fileName, $originalName, $fileType, UserModel $user, $version, $size, $title = null, $description = null) {
+    public function insertVersion($fileName, $originalName, $fileType, UserModel $user, $version, $size, $title = null, $description = null)
+    {
 
         try {
 
@@ -147,7 +156,8 @@ class FileModel extends Model {
         }
     }
 
-    protected function updateVersion($version, FileVersionModel $fileVersion) {
+    protected function updateVersion($version, FileVersionModel $fileVersion)
+    {
         if (is_nan($version) || $version <= 0) {
             return false;
         }
@@ -159,7 +169,8 @@ class FileModel extends Model {
         return true;
     }
 
-    protected function fileVersion(FileVersionModel $fileVersion) {
+    protected function fileVersion(FileVersionModel $fileVersion)
+    {
         $this->lastVersion = $fileVersion;
     }
 
@@ -171,7 +182,8 @@ class FileModel extends Model {
      * @param type $content
      * @return boolean|PostModel
      */
-    public function comment(UserModel $user, PostModel $replyToPost, $title, $content) {
+    public function comment(UserModel $user, PostModel $replyToPost, $title, $content)
+    {
         if ($replyToPost->getRootPost()->id != $this->post()->id) {
             return false;
         }
@@ -186,7 +198,8 @@ class FileModel extends Model {
      * @param PostModel $post
      * @return PostModel|null
      */
-    public function post(PostModel $post = null) {
+    public function post(PostModel $post = null)
+    {
         if ($post && $post->file_id == $this->id) {
             $this->post = $post;
         }
@@ -206,7 +219,8 @@ class FileModel extends Model {
      * 
      * @return null|FileVersionModel
      */
-    public function getLastVersion() {
+    public function getLastVersion()
+    {
         $this->assertExists();
         if ($this->lastVersion == null) {
             if ($this->version == 0 || $this->last_version_id == null) {
@@ -226,7 +240,8 @@ class FileModel extends Model {
      * 
      * @return FileVersionModelSet
      */
-    public function versions($condition = null) {
+    public function versions($condition = null)
+    {
         $result = $this->raw()->file_version();
         /* @var $result NotORM_Result */
         if ($condition) {
@@ -243,7 +258,8 @@ class FileModel extends Model {
      * @param UserModel $user
      * @return PostModel
      */
-    public function addComment($title, $content, UserModel $user) {
+    public function addComment($title, $content, UserModel $user)
+    {
         $this->assertExists();
         $post = $this->post()->addReply($content, $title, $user);
         return $post;
@@ -254,7 +270,8 @@ class FileModel extends Model {
      * @param PostPresenter $post
      * @return boolean
      */
-    public function isPostForVersion(PostModel $post) {
+    public function isPostForVersion(PostModel $post)
+    {
         return $this->versions("post_id = {$post->id}")->count() > 0;
     }
 
@@ -263,7 +280,8 @@ class FileModel extends Model {
      * @param PostPresenter $post
      * @return null|FileVersionModel
      */
-    public function getPostVersion(PostModel $post) {
+    public function getPostVersion(PostModel $post)
+    {
         $version = $this->versions("post_id = {$post->id}")->fetch();
         if ($version) {
             $version = $version->model();
@@ -276,7 +294,8 @@ class FileModel extends Model {
      * @param type $condition
      * @return FileCommentModelSet
      */
-    public function comments($condition = null) {
+    public function comments($condition = null)
+    {
         $replies = $this->post()->getReplies($condition);
         return FileCommentModelSet::create($replies, $this);
     }
@@ -286,7 +305,8 @@ class FileModel extends Model {
      * @param type $versionId
      * @return FileVersionModel
      */
-    public function getVersion($versionId) {
+    public function getVersion($versionId)
+    {
         $version = $this->versions("id={$versionId}");
         $result = null;
         foreach ($version as $result)
@@ -294,14 +314,16 @@ class FileModel extends Model {
         return $result;
     }
 
-    public function remove() {
+    public function remove()
+    {
         $this->assertExists();
         $this->set("status", "deleted");
         $this->save();
         return true;
     }
 
-    public function isRemoved() {
+    public function isRemoved()
+    {
         return $this->status == "deleted";
     }
 
@@ -309,7 +331,8 @@ class FileModel extends Model {
      * 
      * @return UserModel
      */
-    public function uploader() {
+    public function uploader()
+    {
         $this->assertExists();
         return $this->raw()->user->model();
     }
@@ -318,14 +341,17 @@ class FileModel extends Model {
      * 
      * @return UserModel
      */
-    public function lastUpdater() {
+    public function lastUpdater()
+    {
         return $this->getLastVersion()->user();
     }
 
-    public function update($title, $content, $category, $tags) {
+    public function update($title, $content, $category, $tags, array $rights = [])
+    {
         try {
             $this->post()->update($title, $content, $category, $tags);
             $this->set("title", $title);
+            $this->set("rights", "|" . implode("|", $rights) . "|");
             $this->save();
             return false;
         } catch (Exception $e) {
@@ -333,12 +359,14 @@ class FileModel extends Model {
         }
     }
 
-    public function updateLastVersion(FileVersionModel $lastVersion) {
+    public function updateLastVersion(FileVersionModel $lastVersion)
+    {
         $this->assertExists();
         $this->updateVersion($lastVersion->version, $lastVersion);
     }
 
-    public function removeVersion($id) {
+    public function removeVersion($id)
+    {
         $fileVersion = $this->getVersion($id);
         if (!$fileVersion) {
             throw new Exception("Not a file version", 1);
@@ -359,20 +387,24 @@ class FileModel extends Model {
      * 
      * @return CategoryModel|null
      */
-    public function category() {
+    public function category()
+    {
         $category = $this->post()->category();
         return $category;
     }
 
 }
 
-class FilePresenter extends Presenter {
+class FilePresenter extends Presenter
+{
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->me();
     }
 
-    public function me() {
+    public function me()
+    {
         return $this->title;
     }
 
@@ -381,11 +413,13 @@ class FilePresenter extends Presenter {
      * @param \Model $model
      * @return \FilePresenter
      */
-    public static function create(\Model $model) {
+    public static function create(\Model $model)
+    {
         return new FilePresenter($model);
     }
 
-    public function description() {
+    public function description()
+    {
         return $this->model()->post()->content;
     }
 
@@ -393,18 +427,21 @@ class FilePresenter extends Presenter {
      * 
      * @return FileModel
      */
-    public function model() {
+    public function model()
+    {
         return parent::model();
     }
 
     /**
      * @return PostPresenterSet
      */
-    public function comments() {
+    public function comments()
+    {
         return $this->model()->comments()->presenterSet();
     }
 
-    public function versions() {
+    public function versions()
+    {
         return $this->model()->versions()->presenterSet();
     }
 
@@ -412,7 +449,8 @@ class FilePresenter extends Presenter {
      * 
      * @return UserPresenter
      */
-    public function uploader() {
+    public function uploader()
+    {
         return $this->model()->uploader()->presenter();
     }
 
@@ -420,7 +458,8 @@ class FilePresenter extends Presenter {
      * 
      * @return UserPresenter
      */
-    public function lastUpdater() {
+    public function lastUpdater()
+    {
         return $this->model()->lastUpdater()->presenter();
     }
 
@@ -428,7 +467,8 @@ class FilePresenter extends Presenter {
      * 
      * @return FileVersionPresenter
      */
-    public function lastVersion() {
+    public function lastVersion()
+    {
         return $this->model()->getLastVersion()->presenter();
     }
 
@@ -436,7 +476,8 @@ class FilePresenter extends Presenter {
      * 
      * @return CategoryPresenter
      */
-    public function category() {
+    public function category()
+    {
         $category = $this->model()->category();
         if ($category) {
             $category = $category->presenter();
@@ -448,20 +489,39 @@ class FilePresenter extends Presenter {
      * 
      * @return PostPresenter
      */
-    public function post() {
+    public function post()
+    {
         return $this->model()->post()->presenter();
+    }
+
+    public function accessRights()
+    {
+        $rights = $this->rights;
+        if ($rights === "||") {
+            return __("Open");
+        }
+        $usersList = str_replace("|", ",", trim($rights, "|"));
+        $users = UserQuery::getInstance()->all("id in ($usersList)", ORM::RETURN_AS_PRESENTER);
+        $result = "";
+        foreach ($users as $user) {
+            /* @var $user UserPresenter */
+            $result.=($result === "" ? "" : ", ") . $user->displayName();
+        }
+        return $result;
     }
 
 }
 
-class FileModelSet extends ModelSet {
+class FileModelSet extends ModelSet
+{
 
     /**
      * 
      * @param \NotORM_Row $row
      * @return FileModel
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return FileModel::create($row);
     }
 
@@ -469,20 +529,23 @@ class FileModelSet extends ModelSet {
      * 
      * @return FilePresenterSet
      */
-    public function presenterSet() {
+    public function presenterSet()
+    {
         return FilePresenterSet::create($this->rawSet());
     }
 
 }
 
-class FilePresenterSet extends PresenterSet {
+class FilePresenterSet extends PresenterSet
+{
 
     /**
      * 
      * @param \NotORM_Row $row
      * @return FilePresenter
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return FilePresenter::create($row->model());
     }
 
@@ -490,7 +553,8 @@ class FilePresenterSet extends PresenterSet {
      * 
      * @return FileModelSet
      */
-    public function modelSet() {
+    public function modelSet()
+    {
         return FileModelSet::create($this->rawSet());
     }
 
@@ -500,7 +564,8 @@ class FilePresenterSet extends PresenterSet {
  * @property PostModel $post
  * @property FileModel $file
  */
-class FileVersionModel extends Model {
+class FileVersionModel extends Model
+{
 
     protected $post = null;
     protected $file = null;
@@ -509,7 +574,8 @@ class FileVersionModel extends Model {
      * 
      * @return FileVersionPresenter
      */
-    public function presenter() {
+    public function presenter()
+    {
         return FileVersionPresenter::create($this);
     }
 
@@ -518,7 +584,8 @@ class FileVersionModel extends Model {
      * @param \NotORM_Row $row
      * @return \FileVersionModel
      */
-    public static function create(\NotORM_Row $row) {
+    public static function create(\NotORM_Row $row)
+    {
         return new static($row);
     }
 
@@ -527,7 +594,8 @@ class FileVersionModel extends Model {
      * @param PostModel $post
      * @return PostModel
      */
-    public function post(PostModel $post = null) {
+    public function post(PostModel $post = null)
+    {
         if ($post && $post->id == $this->post_id) {
             $this->post = $post;
         }
@@ -543,7 +611,8 @@ class FileVersionModel extends Model {
      * 
      * @return FileModel
      */
-    public function file() {
+    public function file()
+    {
         $this->assertExists();
         if (!$this->file) {
             $this->file = $this->raw()->file->model();
@@ -551,7 +620,8 @@ class FileVersionModel extends Model {
         return $this->file;
     }
 
-    public function getDownloadName($upperCaseExtension = false) {
+    public function getDownloadName($upperCaseExtension = false)
+    {
         $this->assertExists();
         $name = str_replace([" ", "\t"], "_", $this->file()->title) . "_" . $this->version;
         $name.="." . pass(pathinfo($this->file_name, PATHINFO_EXTENSION), $upperCaseExtension ? "strtoupper" : "");
@@ -562,12 +632,14 @@ class FileVersionModel extends Model {
      * 
      * @return UserModel
      */
-    public function user() {
+    public function user()
+    {
         $this->assertExists();
         return $this->raw()->user->model();
     }
 
-    public function remove() {
+    public function remove()
+    {
         $this->assertExists();
 //        unlink(ROOT_PATH . DIRECTORY_SEPARATOR . "assets/uploads/{$this->file_name}");
 //        $this->raw()->post->delete();
@@ -578,13 +650,16 @@ class FileVersionModel extends Model {
 
 }
 
-class FileVersionPresenter extends Presenter {
+class FileVersionPresenter extends Presenter
+{
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->me();
     }
 
-    public function me() {
+    public function me()
+    {
         return $this->version;
     }
 
@@ -593,7 +668,8 @@ class FileVersionPresenter extends Presenter {
      * @param \Model $model
      * @return \FileVersionPresenter
      */
-    public static function create(\Model $model) {
+    public static function create(\Model $model)
+    {
         return new static($model);
     }
 
@@ -601,7 +677,8 @@ class FileVersionPresenter extends Presenter {
      * 
      * @return FileVersionModel
      */
-    public function model() {
+    public function model()
+    {
         return parent::model();
     }
 
@@ -609,11 +686,13 @@ class FileVersionPresenter extends Presenter {
      * 
      * @return UserPresenter
      */
-    public function user() {
+    public function user()
+    {
         return $this->model()->user()->presenter();
     }
 
-    public function size($unit = "b") {
+    public function size($unit = "b")
+    {
         $size = $this->file_size;
         $divider = 1;
         switch ($unit) {
@@ -635,14 +714,16 @@ class FileVersionPresenter extends Presenter {
 
 }
 
-class FileVersionModelSet extends ModelSet {
+class FileVersionModelSet extends ModelSet
+{
 
     /**
      * 
      * @param \NotORM_Row $row
      * @return FileVersionModel
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return FileVersionModel::create($row);
     }
 
@@ -650,20 +731,23 @@ class FileVersionModelSet extends ModelSet {
      * 
      * @return FileVersionPresenterSet
      */
-    public function presenterSet() {
+    public function presenterSet()
+    {
         return FileVersionPresenterSet::create($this->rawSet());
     }
 
 }
 
-class FileVersionPresenterSet extends PresenterSet {
+class FileVersionPresenterSet extends PresenterSet
+{
 
     /**
      * 
      * @param \NotORM_Row $row
      * @return FileVersionPresenter
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return FileVersionPresenter::create($row->model());
     }
 
@@ -671,7 +755,8 @@ class FileVersionPresenterSet extends PresenterSet {
      * 
      * @return FileVersionModelSet
      */
-    public function modelSet() {
+    public function modelSet()
+    {
         return FileVersionModelSet::create($this->rawSet());
     }
 
@@ -680,7 +765,8 @@ class FileVersionPresenterSet extends PresenterSet {
 /**
  * @property FileVersionModel $version
  */
-class FileCommentModel extends PostModel {
+class FileCommentModel extends PostModel
+{
 
     protected $version = false;
 
@@ -689,11 +775,13 @@ class FileCommentModel extends PostModel {
      * @param \NotORM_Row $model
      * @return \FileCommentModel
      */
-    public static function create(\NotORM_Row $model) {
+    public static function create(\NotORM_Row $model)
+    {
         return new FileCommentModel($model);
     }
 
-    public function __construct(\NotORM_Row $model, \UserModel $user = null) {
+    public function __construct(\NotORM_Row $model, \UserModel $user = null)
+    {
         parent::__construct($model, $user);
     }
 
@@ -701,7 +789,8 @@ class FileCommentModel extends PostModel {
      * 
      * @return FileModel
      */
-    public function file() {
+    public function file()
+    {
         return FileQuery::getInstance()->findById($this->file_id);
     }
 
@@ -709,7 +798,8 @@ class FileCommentModel extends PostModel {
      * 
      * @return FileCommentPresenter
      */
-    public function presenter() {
+    public function presenter()
+    {
         return parent::presenter();
     }
 
@@ -717,7 +807,8 @@ class FileCommentModel extends PostModel {
      * 
      * @return FileVersionModelSet
      */
-    protected function version() {
+    protected function version()
+    {
         if ($this->version === false) {
             $version = $this->file()->versions("post_id = {$this->id}");
             $result = null;
@@ -729,7 +820,8 @@ class FileCommentModel extends PostModel {
         return $this->version;
     }
 
-    public function isVersion() {
+    public function isVersion()
+    {
         return $this->version() != false;
     }
 
@@ -737,24 +829,28 @@ class FileCommentModel extends PostModel {
      * 
      * @return null|FileVersionModel
      */
-    public function getVersion() {
+    public function getVersion()
+    {
         return $this->version();
     }
 
 }
 
-class FileCommentPresenter extends PostPresenter {
+class FileCommentPresenter extends PostPresenter
+{
 
     /**
      * 
      * @param \Model $model
      * @return \FileCommentPresenter
      */
-    public static function create(\Model $model) {
+    public static function create(\Model $model)
+    {
         return new FileCommentPresenter($model);
     }
 
-    public function __construct(\PostModel $model) {
+    public function __construct(\PostModel $model)
+    {
         parent::__construct($model);
         $this->model = FileCommentModel::create($model->raw());
     }
@@ -763,11 +859,13 @@ class FileCommentPresenter extends PostPresenter {
      * 
      * @return FileCommentModel
      */
-    public function model() {
+    public function model()
+    {
         return parent::model();
     }
 
-    public function isVersion() {
+    public function isVersion()
+    {
         return $this->model()->isVersion();
     }
 
@@ -775,7 +873,8 @@ class FileCommentPresenter extends PostPresenter {
      * 
      * @return null|FileVersionPresenter
      */
-    public function getVersion() {
+    public function getVersion()
+    {
         $version = $this->model()->getVersion();
         if ($version) {
             $version = $version->presenter();
@@ -788,7 +887,8 @@ class FileCommentPresenter extends PostPresenter {
 /**
  * @property FileModel $fileModel
  */
-class FileCommentModelSet extends PostModelSet {
+class FileCommentModelSet extends PostModelSet
+{
 
     protected $fileModel = null;
 
@@ -798,16 +898,19 @@ class FileCommentModelSet extends PostModelSet {
      * @param FileModel $file
      * @return \FileCommentModelSet
      */
-    public static function create(\NotORM_Result $set, FileModel $file) {
+    public static function create(\NotORM_Result $set, FileModel $file)
+    {
         return new FileCommentModelSet($set, $file);
     }
 
-    public function __construct(\NotORM_Result $set, FileModel $file) {
+    public function __construct(\NotORM_Result $set, FileModel $file)
+    {
         parent::__construct($set);
         $this->fileModel = $file;
     }
 
-    public function file() {
+    public function file()
+    {
         return $this->fileModel;
     }
 
@@ -816,7 +919,8 @@ class FileCommentModelSet extends PostModelSet {
      * @param \NotORM_Row $row
      * @return FileCommentModel
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return FileCommentModel::create($row);
     }
 
@@ -824,7 +928,8 @@ class FileCommentModelSet extends PostModelSet {
      * 
      * @return FileCommentPresenterSet
      */
-    public function presenterSet() {
+    public function presenterSet()
+    {
         return FileCommentPresenterSet::create($this->rawSet(), $this->fileModel->presenter());
     }
 
@@ -833,7 +938,8 @@ class FileCommentModelSet extends PostModelSet {
 /**
  * @property FilePresenter $filePresenter
  */
-class FileCommentPresenterSet extends PostPresenterSet {
+class FileCommentPresenterSet extends PostPresenterSet
+{
 
     protected $filePresenter = null;
 
@@ -843,11 +949,13 @@ class FileCommentPresenterSet extends PostPresenterSet {
      * @param FilePresenter $file
      * @return \FileCommentPresenterSet
      */
-    public static function create(\NotORM_Result $set, FilePresenter $file) {
+    public static function create(\NotORM_Result $set, FilePresenter $file)
+    {
         return new FileCommentPresenterSet($set, $file);
     }
 
-    public function __construct(\NotORM_Result $set, FilePresenter $file) {
+    public function __construct(\NotORM_Result $set, FilePresenter $file)
+    {
         parent::__construct($set);
         $this->filePresenter = $file;
     }
@@ -856,7 +964,8 @@ class FileCommentPresenterSet extends PostPresenterSet {
      * 
      * @return FilePresenter
      */
-    public function file() {
+    public function file()
+    {
         return $this->filePresenter;
     }
 
@@ -865,7 +974,8 @@ class FileCommentPresenterSet extends PostPresenterSet {
      * @param \NotORM_Row $row
      * @return FileCommentPresenter
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return FileCommentPresenter::create($row->model());
     }
 
@@ -873,7 +983,8 @@ class FileCommentPresenterSet extends PostPresenterSet {
      * 
      * @return FileCommentModelSet
      */
-    public function modelSet() {
+    public function modelSet()
+    {
         return FileCommentModelSet::create($this->rawSet(), $this->filePresenter->model());
     }
 

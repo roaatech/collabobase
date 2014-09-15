@@ -1,8 +1,10 @@
 <?php
 
-class Files extends MY_Controller {
+class Files extends MY_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
 
         parent::__construct();
 
@@ -16,7 +18,8 @@ class Files extends MY_Controller {
         $this->setData("active_tab", "files");
     }
 
-    public function index($page = 1) {
+    public function index($page = 1)
+    {
 
         //getting category and search
         $category = $this->input->get("category", true);
@@ -27,8 +30,11 @@ class Files extends MY_Controller {
         $direction = strtolower($this->input->get("direction", true));
         $qs = $_SERVER['QUERY_STRING'];
 
+        $rights = $this->currentUser()->isSupervisor() ? ["%"] : ["||", "%|{$this->currentUser()->model()->id}|%"];
+
+
         //condition
-        $condition = "";
+        $condition = "(user_id = {$this->currentUser()->model()->id} or rights like '" . implode("' or rights like '", $rights) . "')";
         if ($category && $category != "uncategorized") {
             $condition.="id in (select file_id from file_category where category_id = '$category')";
         }if ($category && $category == "uncategorized") {
@@ -101,7 +107,8 @@ class Files extends MY_Controller {
         return $this->view_loader->load("internal/files/list", $this->data, 'internal');
     }
 
-    public function newFile() {
+    public function newFile()
+    {
 
         //setting the data
         $this->setData("sub_title", "Upload New File");
@@ -110,13 +117,20 @@ class Files extends MY_Controller {
 
         $this->setData("return_path", base_url("files"));
 
+        $users = UserQuery::getInstance()->all("id != {$this->currentUser()->model()->id}", UserQuery::RETURN_AS_PRESENTER);
+        $this->setData("users", $users);
+
         return $this->displayFileForm();
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $file = FileQuery::getInstance()->findById($id);
         if (!$file) {
-            return $this->redirectWithOperationMessage("files", "Not a file", 1);
+            return $this->redirectWithOperationMessage("files", "Not a file!", 1);
+        }
+        if (!$this->currentUser()->canEditFile($file)) {
+            return $this->redirectWithOperationMessage("files", "Can not edit the specified file!", 1);
         }
 
         $this->setData("sub_title", "Edit file");
@@ -125,11 +139,14 @@ class Files extends MY_Controller {
         $this->setData("file", $file);
         $this->setData("return_path", base_url("files/view/$id"));
 
+        $users = UserQuery::getInstance()->all("id != {$this->currentUser()->model()->id}", UserQuery::RETURN_AS_PRESENTER);
+        $this->setData("users", $users);
 
         return $this->displayFileForm();
     }
 
-    protected function displayFileForm() {
+    protected function displayFileForm()
+    {
 
         //prepare the data
         $categories = CategoryQuery::getInstance()->all(null, CategoryQuery::RETURN_AS_PRESENTER);
@@ -141,7 +158,8 @@ class Files extends MY_Controller {
         return $this->view_loader->load("internal/files/form", $this->data, 'internal');
     }
 
-    public function uploadNewFile() {
+    public function uploadNewFile()
+    {
 //        $this->output->enable_profiler(TRUE);
 
         try {
@@ -163,6 +181,7 @@ class Files extends MY_Controller {
             $category = $this->input->post("category");
             $tags = $this->input->post("tags");
             $version = $this->input->post("version");
+            $rights = $this->input->post("rights", true)? : [];
 
             //preparing category
             if ($category) {
@@ -190,7 +209,7 @@ class Files extends MY_Controller {
             $uploadData = $this->upload->data();
 
             //creating the file
-            $fileModel = FileQuery::getInstance()->insertNew($title, $description, $this->currentUser()->model());
+            $fileModel = FileQuery::getInstance()->insertNew($title, $description, $this->currentUser()->model(), $rights);
 
             //adding the tags and the category
             $fileModel->post()->category($categoryModel, true);
@@ -205,7 +224,8 @@ class Files extends MY_Controller {
         }
     }
 
-    public function view($id) {
+    public function view($id)
+    {
 
         $fileModel = FileQuery::getInstance()->findById($id);
         if (!$fileModel) {
@@ -214,6 +234,9 @@ class Files extends MY_Controller {
 
         if ($fileModel->isRemoved()) {
             return $this->redirectWithOperationMessage("files", "This file has been deleted!", 1);
+        }
+        if (!$this->currentUser()->canViewFile($fileModel)) {
+            $this->redirectWithOperationMessage("files", "The specified file is prohibited!", 1);
         }
 
         $category = $fileModel->post()->category();
@@ -228,7 +251,8 @@ class Files extends MY_Controller {
         return $this->view_loader->load("internal/files/view", $this->data, 'internal');
     }
 
-    public function download($id, $versionId = null) {
+    public function download($id, $versionId = null)
+    {
 
         $this->load->library('user_agent');
         $this->load->library('MobileDetect');
@@ -239,6 +263,10 @@ class Files extends MY_Controller {
         if (!$fileModel) {
             return $this->redirect("files");
         }
+        if (!$this->currentUser()->canViewFile($fileModel)) {
+            $this->redirectWithOperationMessage("files", "The specified file is prohibited!", 1);
+        }
+
 
         //getting Last version
         if ($versionId === null) {
@@ -250,29 +278,32 @@ class Files extends MY_Controller {
             return $this->redirect("files");
         }
 
-        //preparing data
-//        if ($this->agent->is_mobile("Android")) {
-//        if ($detector->isAndroidOS()) {
-            $fileName = $version->getDownloadName(true);
-            $this->output->set_header("Content-Type: application/octet-stream");
-            $this->output->set_header("Content-Disposition: attachment; filename=\"$fileName\"");
-//        } else {
-//            $fileName = $version->getDownloadName();
-//            $this->output->set_header("Content-Type: {$version->file_type}; name={$fileName}");
-//            $this->output->set_header("Content-Disposition: attachment; filename=$fileName");
-//        }
+        //preparing paths and names
+        $fileName = $version->getDownloadName(true);
         $filePath = $this->getFileFullPath($version->file_name);
-        header("Content-Length: " . filesize($filePath));
 
-        readfile($filePath);
+        //setting headers
+        $this->output->set_header("Content-Length: " . filesize($filePath));
+        $this->output->set_header("Content-Type: application/octet-stream");
+        $this->output->set_header("Content-Disposition: attachment; filename=\"$fileName\"");
+
+        //reading file
+        $file = file_get_contents($filePath);
+        
+        //outputting
+        $this->output->_display($file);
     }
 
-    public function newVersion($id) {
+    public function newVersion($id)
+    {
 
         //preparing the file
         $fileModel = FileQuery::getInstance()->findById($id);
         if (!$fileModel) {
             return $this->redirectWithOperationMessage("files", "Not a file!", 1);
+        }
+        if (!$this->currentUser()->canEditFile($fileModel)) {
+            return $this->redirectWithOperationMessage("files", "Can not edit the specified file!", 1);
         }
 
         //setting the data
@@ -285,7 +316,8 @@ class Files extends MY_Controller {
         return $this->displayFileForm();
     }
 
-    public function uploadNewVersion() {
+    public function uploadNewVersion()
+    {
 //        $this->output->enable_profiler(TRUE);
 
         try {
@@ -309,6 +341,9 @@ class Files extends MY_Controller {
             $fileModel = FileQuery::getInstance()->findById($id);
             if (!$fileModel) {
                 return $this->redirectWithOperationMessage("files", "Not a file", 1);
+            }
+            if (!$this->currentUser()->canEditFile($fileModel)) {
+                return $this->redirectWithOperationMessage("files", "Can not edit the specified file!", 1);
             }
 
             if ($fileModel->version >= $version) {
@@ -349,16 +384,21 @@ class Files extends MY_Controller {
         }
     }
 
-    public function removeFile($id) {
+    public function removeFile($id)
+    {
         $file = FileQuery::getInstance()->findById($id);
         if (!$file) {
             return $this->redirectWithOperationMessage("files", "Not a file", 1);
+        }
+        if (!$this->currentUser()->canEditFile($file)) {
+            return $this->redirectWithOperationMessage("files", "Can not edit the specified file!", 1);
         }
         $file->remove();
         return $this->redirectWithOperationMessage("files", "The file has been deleted!", 0);
     }
 
-    public function removeVersion($id) {
+    public function removeVersion($id)
+    {
 //        $this->output->enable_profiler(TRUE);
 
         try {
@@ -366,7 +406,9 @@ class Files extends MY_Controller {
             if (!$file) {
                 throw new Exception("Not a file", 1);
             }
-
+            if (!$this->currentUser()->canEditFile($file)) {
+                return $this->redirectWithOperationMessage("files", "Can not edit the specified file!", 1);
+            }
 
             $this->load->library('form_validation');
 
@@ -390,7 +432,8 @@ class Files extends MY_Controller {
         }
     }
 
-    public function addComment($id) {
+    public function addComment($id)
+    {
 //        $this->output->enable_profiler(TRUE);
 
         try {
@@ -398,6 +441,9 @@ class Files extends MY_Controller {
             $fileModel = FileQuery::getInstance()->findById($id);
             if (!$fileModel) {
                 throw new Exception("Not a file!", 1);
+            }
+            if (!$this->currentUser()->canViewFile($fileModel)) {
+                $this->redirectWithOperationMessage("files", "The specified file is prohibited!", 1);
             }
 
             $this->load->library('form_validation');
@@ -424,7 +470,8 @@ class Files extends MY_Controller {
         }
     }
 
-    public function updateFile() {
+    public function updateFile()
+    {
 //        $this->output->enable_profiler(TRUE);
 
         try {
@@ -446,11 +493,15 @@ class Files extends MY_Controller {
             if (!$fileModel) {
                 throw new Exception("Not a file!", 1);
             }
+            if (!$this->currentUser()->canEditFile($fileModel)) {
+                return $this->redirectWithOperationMessage("files", "Can not edit the specified file!", 1);
+            }
 
             $title = $this->input->post('title', true);
             $content = $this->input->post('description', true);
             $category = $this->input->post('category', true);
             $tags = $this->input->post('tags', true);
+            $rights = $this->input->post("rights", true)? : [];
 
             //preparing category
             if ($category) {
@@ -459,7 +510,7 @@ class Files extends MY_Controller {
                 $categoryModel = null;
             }
 
-            $error = $fileModel->update($title, $content, $categoryModel, $tags);
+            $error = $fileModel->update($title, $content, $categoryModel, $tags, $rights);
             if ($error) {
                 throw new Exception("Error in adding the comment", 1);
             }
@@ -470,7 +521,8 @@ class Files extends MY_Controller {
         }
     }
 
-    protected function getFileFullPath($name) {
+    protected function getFileFullPath($name)
+    {
         return __DIR__ . DIRECTORY_SEPARATOR . self::LEVEL_UP . DIRECTORY_SEPARATOR . self::LEVEL_UP . DIRECTORY_SEPARATOR . "/assets/uploads/" . $name;
     }
 

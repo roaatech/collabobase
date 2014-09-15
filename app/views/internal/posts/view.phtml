@@ -3,7 +3,8 @@
 /* @var $post PostModel */
 /* @var $postCategory CategoryModel */
 
-function displayReply(PostPresenter $reply, CurrentUser $currentUser) {
+function displayReply(PostPresenter $reply, CurrentUser $currentUser)
+{
     $replyAllowed = $currentUser->canReplyToPost($reply->model());
     ?>
     <hr />
@@ -167,6 +168,12 @@ $postCategory = $post->category();
                         <div class="form-control-static"><?= ucfirst($post->status) ?>.</div>
                     </div>
                 <?php endif; ?>
+                <div class="form-group">
+                    <label class="control-label"><?= __("Rights") ?></label>
+                    <div class="form-control-static">
+                        <?= $post->presenter()->accessRights() ?>
+                    </div>
+                </div>
             </div>
             <div class="after-side-region visible-lg visible-md">
                 <ul class="nav nav-stack">
@@ -237,9 +244,9 @@ $postCategory = $post->category();
         <input type="hidden" name="id" value="<?= $post->id ?>" />
     </form>
     <script type="text/javascript">
-        jQuery(function() {
+        jQuery(function () {
             $.extend(fw.logic, {
-                confirmClosePost: function() {
+                confirmClosePost: function () {
                     $.showdal({
                         title: "<?= __("Confirm Close Discussion") ?>",
                         body: "<?= __("Are you sure you want to close this discussion? No replies/edits can be added later!") ?>",
@@ -247,7 +254,7 @@ $postCategory = $post->category();
                             Delete: {
                                 title: "<i class='glyphicon glyphicon-lock'></i> <?= __("Close the discussion") ?>",
                                 class: "btn btn-primary",
-                                action: function(e) {
+                                action: function (e) {
                                     $(this).showdal("hide");
                                     $("#close-post-form").submit();
                                 },
@@ -255,7 +262,7 @@ $postCategory = $post->category();
                             Cancel: {
                                 title: "<?= __("Cancel") ?>",
                                 class: "btn btn-default pull-left",
-                                action: function(e) {
+                                action: function (e) {
                                     $(this).showdal("hide");
                                 },
                             },
@@ -268,10 +275,10 @@ $postCategory = $post->category();
 <?php endif; ?>
 <script type="text/javascript">
 
-    jQuery(function() {
+    jQuery(function () {
 
         $.extend(fw.logic, {
-            confirmDeletePost: function(postId) {
+            confirmDeletePost: function (postId) {
                 if (!postId)
                     return;
                 $("#delete-post-id").val(postId);
@@ -282,7 +289,7 @@ $postCategory = $post->category();
                         Delete: {
                             title: "<i class='glyphicon glyphicon-remove'></i> <?= __("Delete the discussion") ?>",
                             class: "btn btn-danger",
-                            action: function(e) {
+                            action: function (e) {
                                 $(this).showdal("hide");
                                 $("#delete-post-form").submit();
                             },
@@ -290,14 +297,14 @@ $postCategory = $post->category();
                         Cancel: {
                             title: "<?= __("Cancel") ?>",
                             class: "btn btn-default pull-left",
-                            action: function(e) {
+                            action: function (e) {
                                 $(this).showdal("hide");
                             },
                         },
                     }
                 });
             },
-            confirmDeleteReply: function(replyId) {
+            confirmDeleteReply: function (replyId) {
                 if (!replyId)
                     return;
                 $("#delete-post-id").val(replyId);
@@ -308,7 +315,7 @@ $postCategory = $post->category();
                         Delete: {
                             title: "<i class='glyphicon glyphicon-remove'></i> <?= __("Delete the reply") ?>",
                             class: "btn btn-danger",
-                            action: function(e) {
+                            action: function (e) {
                                 $(this).showdal("hide");
                                 $("#delete-post-form").submit();
                             },
@@ -316,7 +323,7 @@ $postCategory = $post->category();
                         Cancel: {
                             title: "<?= __("Cancel") ?>",
                             class: "btn btn-default pull-left",
-                            action: function(e) {
+                            action: function (e) {
                                 $(this).showdal("hide");
                             },
                         },
@@ -338,7 +345,7 @@ $postCategory = $post->category();
 //                ['help', ['help']] //no help button
             ]
         });
-        $("#reply-form").submit(function() {
+        $("#reply-form").submit(function () {
             updateReplyContent();
         });
     });

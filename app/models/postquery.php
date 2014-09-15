@@ -1,8 +1,10 @@
 <?php
 
-class PostQuery extends ORM {
+class PostQuery extends ORM
+{
 
-    function __construct() {
+    function __construct()
+    {
         parent::__construct();
     }
 
@@ -10,7 +12,8 @@ class PostQuery extends ORM {
      * @param type $id
      * @return PostModel
      */
-    function findById($id) {
+    function findById($id)
+    {
         $result = $this->post[$id];
         if ($result)
             $result = PostModel::create($result);
@@ -22,7 +25,8 @@ class PostQuery extends ORM {
      * @param type $conditions
      * @return NotORM_Result
      */
-    function all($conditions = null) {
+    function all($conditions = null)
+    {
         $result = $this->post();
         if ($conditions) {
             $result->where($conditions);
@@ -35,7 +39,8 @@ class PostQuery extends ORM {
      * @param type $conditions
      * @return NotORM_Result
      */
-    function allRoots($conditions = null) {
+    function allRoots($conditions = null)
+    {
         $result = $this->post("post_id is null");
         if ($conditions) {
             $result->where($conditions);
@@ -50,7 +55,8 @@ class PostQuery extends ORM {
      * @param \NotORM_Cache $cache
      * @return PostQuery
      */
-    static function getInstance(\PDO $connection = null, \NotORM_Structure $structure = null, \NotORM_Cache $cache = null) {
+    static function getInstance(\PDO $connection = null, \NotORM_Structure $structure = null, \NotORM_Cache $cache = null)
+    {
         return new self($connection, $structure, $cache);
     }
 
@@ -61,7 +67,8 @@ class PostQuery extends ORM {
      * @param type $user
      * @return boolean|PostModel
      */
-    public function InsertNew($title, $content, UserModel $user, $fileId = null, PostModel $parent = null) {
+    public function InsertNew($title, $content, UserModel $user, $fileId = null, PostModel $parent = null, array $rights = [])
+    {
         try {
 
             if ($fileId === null) {
@@ -83,6 +90,7 @@ class PostQuery extends ORM {
                 'last_update_user_id' => $user->id,
                 "last_reply_time" => $now,
                 'last_reply_user_id' => $user->id,
+                'rights' => "|" . implode("|", $rights) . "|",
             ));
 
             $postModel = PostModel::create($post);
@@ -106,7 +114,8 @@ class PostQuery extends ORM {
 /**
  * @property UserModel $user
  */
-class PostModel extends Model {
+class PostModel extends Model
+{
 
     const STATUS_ACTIVE = 'active';
     const STATUS_DRAFT = 'draft';
@@ -116,7 +125,8 @@ class PostModel extends Model {
 
     protected $user = null;
 
-    public static function create(NotORM_Row $model) {
+    public static function create(NotORM_Row $model)
+    {
         return new PostModel($model);
     }
 
@@ -125,7 +135,8 @@ class PostModel extends Model {
      * @param UserModel $user
      * @return PostModel
      */
-    public static function createEmpty(UserModel $user) {
+    public static function createEmpty(UserModel $user)
+    {
         $row = new NotORM_Row(array(
             "id" => null,
             "title" => "",
@@ -145,7 +156,8 @@ class PostModel extends Model {
         return new static($row, $user);
     }
 
-    public function __construct(NotORM_Row $model, UserModel $user = null) {
+    public function __construct(NotORM_Row $model, UserModel $user = null)
+    {
         $this->assertRowTable($model, 'post');
         parent::__construct($model);
         @$oUser = $this->row->user;
@@ -159,11 +171,13 @@ class PostModel extends Model {
         $this->user = $user;
     }
 
-    public function presenter() {
+    public function presenter()
+    {
         return PostPresenter::create($this);
     }
 
-    public function col($col, $default = null) {
+    public function col($col, $default = null)
+    {
         switch (strtolower($col)) {
             default:
                 $result = parent::col($col, $default);
@@ -173,7 +187,8 @@ class PostModel extends Model {
         return $result;
     }
 
-    public function update($title = null, $content = null, CategoryModel $category = null, $tags = "", UserModel $user = null) {
+    public function update($title = null, $content = null, CategoryModel $category = null, $tags = "", UserModel $user = null, array $rights = [])
+    {
         $this->assertExists();
 
         $now = date('Y-m-d H:i:s');
@@ -186,6 +201,7 @@ class PostModel extends Model {
         $this->row['content'] = $content;
         $this->row['last_update_time'] = $now;
         $this->row['last_update_user_id'] = $user->id;
+        $this->row['rights'] = "|" . implode("|", $rights) . "|";
         $this->row->update();
 
         $this->category($category, true);
@@ -195,7 +211,8 @@ class PostModel extends Model {
         return $this;
     }
 
-    public function setStatus($status) {
+    public function setStatus($status)
+    {
         if ($status != self::STATUS_ACTIVE && $status != self::STATUS_DELETED && $status != self::STATUS_DRAFT && $status != self::STATUS_PENDING && $status != self::STATUS_CLOSED)
             return false;
         $this->row['status'] = $status;
@@ -207,7 +224,8 @@ class PostModel extends Model {
      * 
      * @return null|UserModel
      */
-    public function author() {
+    public function author()
+    {
         return $this->user;
     }
 
@@ -215,7 +233,8 @@ class PostModel extends Model {
      * 
      * @return NotORM_Result
      */
-    public function tags() {
+    public function tags()
+    {
         $result = $this->row->post_tag("tag_id in (select id from tag where tag_type_id is null and tag_id is null)");
         return $result;
     }
@@ -224,7 +243,8 @@ class PostModel extends Model {
      * 
      * @return null|CategoryModel|PostModel
      */
-    public function category(CategoryModel $category = null, $forceUpdate = false) {
+    public function category(CategoryModel $category = null, $forceUpdate = false)
+    {
         if ($category === null && !$forceUpdate) {
             $result = $this->row->post_tag("tag_id in (select id from category)")->fetch();
             if ($result) {
@@ -250,13 +270,15 @@ class PostModel extends Model {
         }
     }
 
-    public function setTags($tags) {
+    public function setTags($tags)
+    {
         $result = $this->row->result()->orm()->post_tag("post_id = {$this->id} and tag_id in (select id from tag where tag_type_id is null and tag_id is null and name not in ('" . str_replace(",", "','", $tags) . "'))");
         $result->delete();
         $this->addTags($tags);
     }
 
-    public function addTags($tags) {
+    public function addTags($tags)
+    {
         foreach (explode(",", $tags) as $tag) {
             $this->addTagByName($tag);
         }
@@ -267,7 +289,8 @@ class PostModel extends Model {
      * @param type $tag
      * @return boolean|integer
      */
-    protected function addTagByName($tag) {
+    protected function addTagByName($tag)
+    {
 
         $tg = TagQuery::getInstance()->findByName($tag);
 
@@ -295,7 +318,8 @@ class PostModel extends Model {
      * @param TagModel $tag
      * @return int
      */
-    protected function addTag(TagModel $tag) {
+    protected function addTag(TagModel $tag)
+    {
         $tag = $this->row->post_tag()->insert(["tag_id" => $tag->id]);
         return $tag['id'];
     }
@@ -304,7 +328,8 @@ class PostModel extends Model {
      * 
      * @return boolean
      */
-    public function isModified() {
+    public function isModified()
+    {
         return $this->time != $this->last_update_time;
     }
 
@@ -312,7 +337,8 @@ class PostModel extends Model {
      * 
      * @return boolean
      */
-    public function isSaved() {
+    public function isSaved()
+    {
         return $this->id != null;
     }
 
@@ -320,7 +346,8 @@ class PostModel extends Model {
      * 
      * @return PostModel
      */
-    public function getRootPost() {
+    public function getRootPost()
+    {
         $this->assertExists();
         $result = $this->root_post_id;
         if (!$result) {
@@ -334,7 +361,8 @@ class PostModel extends Model {
      * 
      * @return PostModel
      */
-    public function getParentPost() {
+    public function getParentPost()
+    {
         $this->assertExists();
         $result = $this->post_id;
         if ($result) {
@@ -347,7 +375,8 @@ class PostModel extends Model {
      * 
      * @return boolean
      */
-    public function isRootPost() {
+    public function isRootPost()
+    {
         $this->assertExists();
         return !$this->post_id && !$this->root_post_id;
     }
@@ -359,7 +388,8 @@ class PostModel extends Model {
      * @param UserModel $user
      * @return PostModel the reply post model object
      */
-    public function addReply($content, $title, UserModel $user = null) {
+    public function addReply($content, $title, UserModel $user = null)
+    {
         if ($user === null) {
             $user = $this->user;
         }
@@ -375,7 +405,8 @@ class PostModel extends Model {
         return $reply;
     }
 
-    protected function updateReplies(PostModel $reply, UserModel $user = null) {
+    protected function updateReplies(PostModel $reply, UserModel $user = null)
+    {
         if ($user === null) {
             $user = $this->user;
         }
@@ -391,7 +422,8 @@ class PostModel extends Model {
      * @param type $conditions
      * @return NotORM_Result
      */
-    public function getReplies($conditions = null) {
+    public function getReplies($conditions = null)
+    {
         $replies = PostQuery::getInstance()->all("root_post_id = {$this->id}");
         if ($conditions) {
             $replies->where($conditions);
@@ -399,62 +431,75 @@ class PostModel extends Model {
         return $replies;
     }
 
-    public function isForFile() {
+    public function isForFile()
+    {
         return $this->file_id != null;
     }
 
-    public function isDraft() {
+    public function isDraft()
+    {
         return $this->status == 'draft';
     }
 
-    public function delete() {
+    public function delete()
+    {
         $this->assertExists();
         $this->setStatus(self::STATUS_DELETED);
         return true;
     }
 
-    public function isOpen() {
+    public function isOpen()
+    {
         return $this->getRootPost()->status == "active";
     }
 
-    public function close() {
+    public function close()
+    {
         $this->assertExists();
         $this->setStatus(self::STATUS_CLOSED);
         return true;
     }
 
-    public function isClosed() {
+    public function isClosed()
+    {
         return $this->status == self::STATUS_CLOSED;
     }
 
 }
 
-class PostPresenter extends Presenter {
+class PostPresenter extends Presenter
+{
 
-    function __construct(PostModel $model) {
+    function __construct(PostModel $model)
+    {
         parent::__construct($model);
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->me();
     }
 
-    public static function create(Model $model) {
+    public static function create(Model $model)
+    {
         if (!($model instanceof PostModel))
             return false;
         return new PostPresenter($model);
     }
 
-    public function me() {
+    public function me()
+    {
         $raw = $this->model()->raw();
         return $raw['title'];
     }
 
-    public function title() {
+    public function title()
+    {
         return $this->model()->col("title");
     }
 
-    public function scrambled($length = 30) {
+    public function scrambled($length = 30)
+    {
         $add = ".";
         $content = $this->model()->col('content');
         $content = strip_tags($content);
@@ -473,7 +518,8 @@ class PostPresenter extends Presenter {
         return $content . $add;
     }
 
-    public function time($format = "Y-m-d H:i:s", $timezone = null) {
+    public function time($format = "Y-m-d H:i:s", $timezone = null)
+    {
         $time = $this->model()->col('time');
         $date = new DateTime($time);
         if ($timezone != null) {
@@ -484,7 +530,8 @@ class PostPresenter extends Presenter {
         return $date->format($format);
     }
 
-    public function last_update_time($format = "Y-m-d H:i:s", $timezone = null) {
+    public function last_update_time($format = "Y-m-d H:i:s", $timezone = null)
+    {
         $time = $this->model()->col('last_update_time');
         $date = new DateTime($time);
         if ($timezone != null) {
@@ -495,7 +542,8 @@ class PostPresenter extends Presenter {
         return $date->format($format);
     }
 
-    public function last_reply_time($format = "Y-m-d H:i:s", $timezone = null) {
+    public function last_reply_time($format = "Y-m-d H:i:s", $timezone = null)
+    {
         $time = $this->model()->col('last_reply_time');
         if (!$time)
             return null;
@@ -508,19 +556,22 @@ class PostPresenter extends Presenter {
         return $date->format($format);
     }
 
-    public function writer() {
+    public function writer()
+    {
         $userId = $this->model()->col('user_id');
         $UserModel = UserQuery::getInstance()->findById($userId);
         return $UserModel->presenter();
     }
 
-    public function updater() {
+    public function updater()
+    {
         $userId = $this->model()->col('last_update_user_id');
         $UserModel = UserQuery::getInstance()->findById($userId);
         return $UserModel->presenter();
     }
 
-    public function lastReplier() {
+    public function lastReplier()
+    {
         $userModel = null;
         $userId = $this->model()->col('last_reply_user_id');
         if ($userId) {
@@ -533,7 +584,8 @@ class PostPresenter extends Presenter {
         }
     }
 
-    public function viewUrl() {
+    public function viewUrl()
+    {
         if ($this->model()->isDraft()) {
             return base_url("posts/edit/{$this->model()->col("id")}");
         } else {
@@ -545,7 +597,8 @@ class PostPresenter extends Presenter {
      * 
      * @return PostModel
      */
-    public function model() {
+    public function model()
+    {
         $model = parent::model();
         return $model;
     }
@@ -554,7 +607,8 @@ class PostPresenter extends Presenter {
      * 
      * @return array
      */
-    public function tagsArray() {
+    public function tagsArray()
+    {
         $tags = $this->model()->tags();
         $result = [];
         foreach ($tags as $tag) {
@@ -564,7 +618,8 @@ class PostPresenter extends Presenter {
         return $result;
     }
 
-    public function tagsCsv($null = null) {
+    public function tagsCsv($null = null)
+    {
         $tags = $this->tagsArray();
         $result = implode(", ", $tags);
         if ($result == "") {
@@ -573,14 +628,16 @@ class PostPresenter extends Presenter {
         return $result;
     }
 
-    public function totalReplies() {
+    public function totalReplies()
+    {
         return $this->model()->col('total_replies')? : 0;
     }
 
     /**
      * @return string|CategoryPresenter
      */
-    public function category() {
+    public function category()
+    {
         $category = $this->model()->category();
         if (!$category) {
             $category = "Uncategorized";
@@ -590,7 +647,8 @@ class PostPresenter extends Presenter {
         return $category;
     }
 
-    public function status() {
+    public function status()
+    {
         $status = $this->model()->status;
         switch ($status) {
             case PostModel::STATUS_ACTIVE:
@@ -608,15 +666,18 @@ class PostPresenter extends Presenter {
         }
     }
 
-    public function content() {
+    public function content()
+    {
         return $this->model()->content;
     }
 
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         return $this->$name;
     }
 
-    public function __get($name) {
+    public function __get($name)
+    {
         switch (strtolower($name)) {
             case 'id':
             case 'content':
@@ -628,24 +689,44 @@ class PostPresenter extends Presenter {
         }
     }
 
-    public function author() {
+    public function author()
+    {
         return $this->model()->author()->presenter();
     }
 
-    public function isClosed() {
+    public function isClosed()
+    {
         return $this->model()->isClosed();
+    }
+
+    public function accessRights()
+    {
+        $rights = $this->model()->rights;
+        if ($rights === "||") {
+            return __("Open");
+        }
+        $usersList = str_replace("|", ",", trim($rights, "|"));
+        $users = UserQuery::getInstance()->all("id in ($usersList)", ORM::RETURN_AS_PRESENTER);
+        $result = "";
+        foreach ($users as $user) {
+            /* @var $user UserPresenter */
+            $result.=($result === "" ? "" : ", ") . $user->displayName();
+        }
+        return $result;
     }
 
 }
 
-class PostModelSet extends ModelSet {
+class PostModelSet extends ModelSet
+{
 
     /**
      * 
      * @param \NotORM_Row $row
      * @return PostModel
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return PostModel::create($row);
     }
 
@@ -653,20 +734,23 @@ class PostModelSet extends ModelSet {
      * 
      * @return PostPresenterSet
      */
-    public function presenterSet() {
+    public function presenterSet()
+    {
         return PostPresenterSet::create($this->rawSet());
     }
 
 }
 
-class PostPresenterSet extends PresenterSet {
+class PostPresenterSet extends PresenterSet
+{
 
     /**
      * 
      * @param \NotORM_Row $row
      * @return PostPresenter
      */
-    protected function get(\NotORM_Row $row) {
+    protected function get(\NotORM_Row $row)
+    {
         return PostPresenter::create($row->model());
     }
 
@@ -674,7 +758,8 @@ class PostPresenterSet extends PresenterSet {
      * 
      * @return PostModelSet
      */
-    public function modelSet() {
+    public function modelSet()
+    {
         return PostModelSet::create($this->rawSet());
     }
 
