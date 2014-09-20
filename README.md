@@ -18,6 +18,7 @@ INSTALL
 3. Import the schema.sql file into the database.
 4. In app/config/database.php, update the host, username, password, and database name to which you have created.
 5. You may need to change the .htaccess, the last line to add the correct URL just before index.php/$1
+6. You need to issue the php composer install to install the requirements of the system. 
 
 DB UPGRADING
 ----------------------
