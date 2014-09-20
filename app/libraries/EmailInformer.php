@@ -1,24 +1,20 @@
 <?php
 
-class EmailInformer
-{
+class EmailInformer {
 
     /**
      * 
      * @return EmailInformer
      */
-    public static function getInstance()
-    {
+    public static function getInstance() {
         return new EmailInformer();
     }
 
-    public function __construct()
-    {
+    public function __construct() {
         require_once ROOT_PATH . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "autoload.php";
     }
 
-    protected function mailer()
-    {
+    protected function mailer() {
         $mail = new PHPMailer;
         $mail->SMTPAuth = false;
         $mail->From = get_instance()->config->item('sender_email');
@@ -27,8 +23,7 @@ class EmailInformer
         return $mail;
     }
 
-    protected function renderEmailMessage($messagePath, array $values = array())
-    {
+    protected function renderEmailMessage($messagePath, array $values = array()) {
         if (!file_exists($messagePath)) {
             user_error("Email message can not be found on $messagePath", E_USER_WARNING);
             return false;
@@ -40,8 +35,7 @@ class EmailInformer
         return $message;
     }
 
-    protected function sendEmail($content, $title, $users)
-    {
+    protected function sendEmail($content, $title, $users) {
 
         //get users
         $users = UserQuery::getInstance()->all("id in ($users)", Model::RETURN_AS_PRESENTER);
@@ -63,8 +57,7 @@ class EmailInformer
         return $result === "" ? true : $result;
     }
 
-    protected function send($message, $title, $receiver, $email)
-    {
+    protected function send($message, $title, $receiver, $email) {
         $mail = $this->mailer();
 
         $mail->addAddress($email, $receiver);
@@ -82,8 +75,7 @@ class EmailInformer
         }
     }
 
-    public function informFileReceivers(FileModel $file, FileVersionModel $version = null)
-    {
+    public function informFileReceivers(FileModel $file, FileVersionModel $version = null) {
         //prepare users
         $users = str_replace("|", ",", trim($file->rights, "|"));
         //return if no user rights specified
@@ -107,8 +99,7 @@ class EmailInformer
         return $this->sendEmail($content, "New file for your attention", $users);
     }
 
-    public function informNewFileVersionReceivers(FileModel $file, FileVersionModel $version)
-    {
+    public function informNewFileVersionReceivers(FileModel $file, FileVersionModel $version) {
         //prepare users
         $users = str_replace("|", ",", trim($file->rights, "|"));
         //return if no user rights specified
@@ -132,8 +123,7 @@ class EmailInformer
         return $this->sendEmail($content, "New file version for your attention", $users);
     }
 
-    public function informFileNewComment(FileModel $file, PostModel $comment)
-    {
+    public function informFileNewComment(FileModel $file, PostModel $comment) {
         //prepare users
         $users = str_replace("|", ",", trim($file->rights, "|"));
         //return if no user rights specified
@@ -156,6 +146,54 @@ class EmailInformer
         }
 
         return $this->sendEmail($content, "New file comment for your attention", $users);
+    }
+
+    public function informNewPost(PostModel $post) {
+        //prepare users
+        $users = str_replace("|", ",", trim($post->rights, "|"));
+        //return if no user rights specified
+        if (!$users) {
+            return;
+        }
+
+        //prepare values array
+        $values = array(
+            "post" => $post->title,
+            "link" => PostPermalink::view($post->id),
+            "author" => $post->author()->presenter()->displayName()
+        );
+        $fs = DIRECTORY_SEPARATOR;
+        $content = $this->renderEmailMessage(APPPATH . "views{$fs}emails{$fs}newPost.phtml", $values);
+        if (!$content) {
+            return false;
+        }
+
+        return $this->sendEmail($content, "New post for your attention", $users);
+    }
+
+    public function informNewPostReply(PostModel $post, PostModel $reply) {
+        //prepare users
+        $users = str_replace("|", ",", trim($post->rights, "|"));
+        //return if no user rights specified
+        if (!$users) {
+            return;
+        }
+
+        //prepare values array
+        $values = array(
+            "post" => $post->title,
+            "author" => $reply->presenter()->author()->displayName(),
+            "title" => $reply->presenter()->title(),
+            "reply" => $reply->presenter()->content(),
+            "link" => PostPermaLink::view($post->id)
+        );
+        $fs = DIRECTORY_SEPARATOR;
+        $content = $this->renderEmailMessage(APPPATH . "views{$fs}emails{$fs}newPostReply.phtml", $values);
+        if (!$content) {
+            return false;
+        }
+
+        return $this->sendEmail($content, "New post reply for your attention", $users);
     }
 
 }

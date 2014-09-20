@@ -120,7 +120,7 @@ $isModification = $post->col("id") !== null;
                             <div class="form-group">
                                 <label class="control-label" for="post-rights"><?= __("Rights") ?></label>
                                 <select multiple="multiple" name="rights[]" id="post-rights" class="form-control" placeholder="<?= __("Select users") ?>">
-                                    <?= $users->asSelectListOptions($post->rights) ?>
+                                    <?= $users->asSelectListOptions(@$post->rights) ?>
                                 </select>
                                 <p class="help-block"><?= __("Keep empty for open access") ?>.</p>
                             </div>
