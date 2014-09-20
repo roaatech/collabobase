@@ -393,7 +393,7 @@ class PostModel extends Model
         if ($user === null) {
             $user = $this->user;
         }
-        $reply = PostQuery::getInstance()->InsertNew($title, $content, $user, $this->file_id, $this, null, null);
+        $reply = PostQuery::getInstance()->InsertNew($title, $content, $user, $this->file_id, $this, []);
         if (!$reply) {
             return $reply;
         }

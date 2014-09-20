@@ -372,3 +372,7 @@ $lang["The specified post does not exist!"]="The specified post does not exist!"
 $lang["The file has been updated!"]="The file has been updated!";
 $lang["minute"]="minute";
 $lang["Open"]="Open";
+$lang[""]="";
+$lang["The filetype you are attempting to upload is not allowed."]="The filetype you are attempting to upload is not allowed.";
+$lang["Version should be larger than the current version 1.20"]="Version should be larger than the current version 1.20";
+$lang["Version should be larger than the current version 1.30"]="Version should be larger than the current version 1.30";

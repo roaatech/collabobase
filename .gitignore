@@ -220,3 +220,4 @@ nbproject/project.properties
 .htaccess
 app/upgrades/version
 assets/uploads/
+app/controllers/db.php

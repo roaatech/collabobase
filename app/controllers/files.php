@@ -218,6 +218,9 @@ class Files extends MY_Controller
             //adding file version
             $fileVersionModel = $fileModel->insertVersion($uploadData['file_name'], $uploadData['orig_name'], $uploadData['file_type'], $this->currentUser()->model(), $version, $uploadData['file_size']);
 
+            $this->load->library("EmailInformer");
+            EmailInformer::getInstance()->informFileReceivers($fileModel, $fileVersionModel);
+
             $this->redirectWithOperationMessage("files/view/{$fileModel->id}", "The file has been successfully uploaded!");
         } catch (Exception $e) {
             $this->redirectWithOperationMessage("/files/new", $e->getMessage(), 1);
@@ -289,7 +292,7 @@ class Files extends MY_Controller
 
         //reading file
         $file = file_get_contents($filePath);
-        
+
         //outputting
         $this->output->_display($file);
     }
@@ -373,6 +376,9 @@ class Files extends MY_Controller
             if (!$fileVersionModel || is_string($fileVersionModel)) {
                 throw new Exception("Error in adding version. $fileVersionModel", 3);
             }
+
+            $this->load->library("EmailInformer");
+            EmailInformer::getInstance()->informNewFileVersionReceivers($fileModel, $fileVersionModel);
 
             return $this->redirectWithOperationMessage("files/view/{$fileModel->id}", "The version has been successfully uploaded!");
         } catch (Exception $e) {
@@ -464,6 +470,9 @@ class Files extends MY_Controller
                 throw new Exception("Error in adding the comment", 1);
             }
 
+            $this->load->library("EmailInformer");
+            EmailInformer::getInstance()->informFileNewComment($fileModel, $comment);
+
             $this->redirectWithOperationMessage("files/view/{$fileModel->id}", "The comment has been added!");
         } catch (Exception $e) {
             var_dump($e);
@@ -514,6 +523,9 @@ class Files extends MY_Controller
             if ($error) {
                 throw new Exception("Error in adding the comment", 1);
             }
+
+            $this->load->library("EmailInformer");
+            EmailInformer::getInstance()->informFileReceivers($fileModel);
 
             $this->redirectWithOperationMessage("files/view/{$id}", "The file has been updated!");
         } catch (Exception $e) {

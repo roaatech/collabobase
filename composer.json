@@ -1,0 +1,13 @@
+{
+    "name": "itvision/collabobase",
+    "description": "Description of project collabobase.",
+    "authors": [
+        {
+            "name": "Muhannad Shelleh",
+            "email": "mhh1422@hotmail.com"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "dev-master"
+    }
+}

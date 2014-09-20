@@ -334,7 +334,11 @@ class FileModel extends Model
     public function uploader()
     {
         $this->assertExists();
-        return $this->raw()->user->model();
+        $user = @$this->raw()->user;
+        if (!$user && $this->col('user_id')) {
+            $user = UserQuery::getInstance()->findById($this->col('user_id'));
+        }
+        return $user;
     }
 
     /**
